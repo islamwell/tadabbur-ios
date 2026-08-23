@@ -4,10 +4,11 @@ import SwiftUI
 
 /// The resting state of the Reflection tab.
 /// Shows the current ayah on a gradient background.
-/// Tapping the card reopens the reflection overlay manually.
+/// Includes instant audio playback with Sheikh Nasser Al-Qatami recitation.
 struct ReflectionHomeView: View {
 
     @EnvironmentObject private var ayahStore: AyahStore
+    @EnvironmentObject private var audioPlayer: AudioPlayer
     @Binding var showOverlay: Bool
     @State private var showShortcutsGuide = false
 
@@ -18,19 +19,27 @@ struct ReflectionHomeView: View {
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 24) {
                     headerSection
                     ayahCard
+                    AudioButtonView()
+                        .padding(.horizontal, 4)
                     openOverlayButton
                     shortcutsGuideButton
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 60)
+                .padding(.top, 50)
             }
         }
         .sheet(isPresented: $showShortcutsGuide) {
             ShortcutsGuideView()
+        }
+        .onAppear {
+            audioPlayer.load(ayah: ayahStore.currentAyah)
+        }
+        .onChange(of: ayahStore.currentAyah) { newAyah in
+            audioPlayer.load(ayah: newAyah)
         }
     }
 
@@ -48,13 +57,13 @@ struct ReflectionHomeView: View {
     }
 
     private var headerSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             Text("تدبر")
-                .font(.system(size: 42, weight: .light))
+                .font(.system(size: 40, weight: .light))
                 .foregroundColor(.white.opacity(0.9))
 
             Text("Tadabbur")
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundColor(.white.opacity(0.5))
                 .tracking(4)
                 .textCase(.uppercase)
@@ -89,9 +98,9 @@ struct ReflectionHomeView: View {
             Text("\(ayahStore.currentIndex) / \(ayahStore.totalCount)")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.white.opacity(0.4))
-                .padding(.top, 4)
+                .padding(.top, 2)
         }
-        .padding(28)
+        .padding(26)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(.white.opacity(0.07))
@@ -109,12 +118,12 @@ struct ReflectionHomeView: View {
             HStack(spacing: 8) {
                 Image(systemName: "moon.stars")
                     .font(.system(size: 15, weight: .medium))
-                Text("Reflect")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                Text("Full Reflection Mode")
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .background(
                 Capsule()
                     .fill(Color("EmeraldLight").opacity(0.35))
@@ -133,7 +142,7 @@ struct ReflectionHomeView: View {
             HStack(spacing: 6) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 13))
-                Text("Auto-Open on Unlock Setup")
+                Text("Auto-Open Setup Guide")
                     .font(.system(size: 13, weight: .medium))
                 Image(systemName: "chevron.right")
                     .font(.system(size: 10, weight: .semibold))
@@ -156,4 +165,5 @@ struct ReflectionHomeView: View {
 #Preview {
     ReflectionHomeView(showOverlay: .constant(false))
         .environmentObject(AyahStore())
+        .environmentObject(AudioPlayer())
 }

@@ -3,13 +3,14 @@ import Foundation
 // MARK: - Ayah Model
 
 struct Ayah: Identifiable, Equatable {
-    let id: Int                     // 1-based, matches audio filename ayah{id}.mp3
+    let id: Int                     // 1-based index
+    let surahNumber: Int            // 1 to 114
     let surahName: String           // English transliteration e.g. "Al-Baqarah"
     let surahNameArabic: String     // Arabic script e.g. "البقرة"
     let ayahNumber: Int
     let arabicText: String
     let translation: String
-    let audioFileName: String?      // nil = no audio file bundled
+    let audioFileName: String?      // bundled file if any e.g. "ayah1.mp3"
 
     /// English reference: "Al-Baqarah · 152"
     var reference: String {
@@ -25,6 +26,17 @@ struct Ayah: Identifiable, Equatable {
         }
         return "\(surahNameArabic) · \(String(arabicDigits))"
     }
+
+    /// EveryAyah audio recitation URL (Nasser Al-Qatami 128kbps)
+    var audioURL: URL? {
+        let fileName = String(format: "%03d%03d.mp3", surahNumber, ayahNumber)
+        return URL(string: "https://everyayah.com/data/Nasser_Alqatami_128kbps/\(fileName)")
+    }
+
+    /// Standardized audio file cache name
+    var audioCacheKey: String {
+        String(format: "%03d%03d.mp3", surahNumber, ayahNumber)
+    }
 }
 
 // MARK: - Curated Ayah Catalog (200 Impactful Verses)
@@ -33,6 +45,7 @@ extension Ayah {
     static let catalog: [Ayah] = [
         Ayah(
             id: 1,
+            surahNumber: 1,
             surahName: "Al-Fatiha",
             surahNameArabic: "الفاتحة",
             ayahNumber: 1,
@@ -42,6 +55,7 @@ extension Ayah {
         ),
         Ayah(
             id: 2,
+            surahNumber: 1,
             surahName: "Al-Fatiha",
             surahNameArabic: "الفاتحة",
             ayahNumber: 2,
@@ -51,6 +65,7 @@ extension Ayah {
         ),
         Ayah(
             id: 3,
+            surahNumber: 1,
             surahName: "Al-Fatiha",
             surahNameArabic: "الفاتحة",
             ayahNumber: 5,
@@ -60,6 +75,7 @@ extension Ayah {
         ),
         Ayah(
             id: 4,
+            surahNumber: 1,
             surahName: "Al-Fatiha",
             surahNameArabic: "الفاتحة",
             ayahNumber: 6,
@@ -69,6 +85,7 @@ extension Ayah {
         ),
         Ayah(
             id: 5,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 2,
@@ -78,6 +95,7 @@ extension Ayah {
         ),
         Ayah(
             id: 6,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 21,
@@ -87,6 +105,7 @@ extension Ayah {
         ),
         Ayah(
             id: 7,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 25,
@@ -96,6 +115,7 @@ extension Ayah {
         ),
         Ayah(
             id: 8,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 45,
@@ -105,6 +125,7 @@ extension Ayah {
         ),
         Ayah(
             id: 9,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 83,
@@ -114,6 +135,7 @@ extension Ayah {
         ),
         Ayah(
             id: 10,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 112,
@@ -123,6 +145,7 @@ extension Ayah {
         ),
         Ayah(
             id: 11,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 115,
@@ -132,6 +155,7 @@ extension Ayah {
         ),
         Ayah(
             id: 12,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 117,
@@ -141,6 +165,7 @@ extension Ayah {
         ),
         Ayah(
             id: 13,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 152,
@@ -150,6 +175,7 @@ extension Ayah {
         ),
         Ayah(
             id: 14,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 153,
@@ -159,6 +185,7 @@ extension Ayah {
         ),
         Ayah(
             id: 15,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 155,
@@ -168,6 +195,7 @@ extension Ayah {
         ),
         Ayah(
             id: 16,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 156,
@@ -177,6 +205,7 @@ extension Ayah {
         ),
         Ayah(
             id: 17,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 157,
@@ -186,6 +215,7 @@ extension Ayah {
         ),
         Ayah(
             id: 18,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 163,
@@ -195,6 +225,7 @@ extension Ayah {
         ),
         Ayah(
             id: 19,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 165,
@@ -204,6 +235,7 @@ extension Ayah {
         ),
         Ayah(
             id: 20,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 186,
@@ -213,6 +245,7 @@ extension Ayah {
         ),
         Ayah(
             id: 21,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 201,
@@ -222,6 +255,7 @@ extension Ayah {
         ),
         Ayah(
             id: 22,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 207,
@@ -231,6 +265,7 @@ extension Ayah {
         ),
         Ayah(
             id: 23,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 214,
@@ -240,6 +275,7 @@ extension Ayah {
         ),
         Ayah(
             id: 24,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 216,
@@ -249,6 +285,7 @@ extension Ayah {
         ),
         Ayah(
             id: 25,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 255,
@@ -258,6 +295,7 @@ extension Ayah {
         ),
         Ayah(
             id: 26,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 256,
@@ -267,6 +305,7 @@ extension Ayah {
         ),
         Ayah(
             id: 27,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 257,
@@ -276,6 +315,7 @@ extension Ayah {
         ),
         Ayah(
             id: 28,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 261,
@@ -285,6 +325,7 @@ extension Ayah {
         ),
         Ayah(
             id: 29,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 267,
@@ -294,6 +335,7 @@ extension Ayah {
         ),
         Ayah(
             id: 30,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 268,
@@ -303,6 +345,7 @@ extension Ayah {
         ),
         Ayah(
             id: 31,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 277,
@@ -312,6 +355,7 @@ extension Ayah {
         ),
         Ayah(
             id: 32,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 285,
@@ -321,6 +365,7 @@ extension Ayah {
         ),
         Ayah(
             id: 33,
+            surahNumber: 2,
             surahName: "Al-Baqarah",
             surahNameArabic: "البقرة",
             ayahNumber: 286,
@@ -330,6 +375,7 @@ extension Ayah {
         ),
         Ayah(
             id: 34,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 8,
@@ -339,6 +385,7 @@ extension Ayah {
         ),
         Ayah(
             id: 35,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 9,
@@ -348,6 +395,7 @@ extension Ayah {
         ),
         Ayah(
             id: 36,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 16,
@@ -357,6 +405,7 @@ extension Ayah {
         ),
         Ayah(
             id: 37,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 18,
@@ -366,6 +415,7 @@ extension Ayah {
         ),
         Ayah(
             id: 38,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 26,
@@ -375,6 +425,7 @@ extension Ayah {
         ),
         Ayah(
             id: 39,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 27,
@@ -384,6 +435,7 @@ extension Ayah {
         ),
         Ayah(
             id: 40,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 31,
@@ -393,6 +445,7 @@ extension Ayah {
         ),
         Ayah(
             id: 41,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 102,
@@ -402,6 +455,7 @@ extension Ayah {
         ),
         Ayah(
             id: 42,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 103,
@@ -411,6 +465,7 @@ extension Ayah {
         ),
         Ayah(
             id: 43,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 104,
@@ -420,6 +475,7 @@ extension Ayah {
         ),
         Ayah(
             id: 44,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 133,
@@ -429,6 +485,7 @@ extension Ayah {
         ),
         Ayah(
             id: 45,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 134,
@@ -438,6 +495,7 @@ extension Ayah {
         ),
         Ayah(
             id: 46,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 135,
@@ -447,6 +505,7 @@ extension Ayah {
         ),
         Ayah(
             id: 47,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 139,
@@ -456,6 +515,7 @@ extension Ayah {
         ),
         Ayah(
             id: 48,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 144,
@@ -465,6 +525,7 @@ extension Ayah {
         ),
         Ayah(
             id: 49,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 159,
@@ -474,6 +535,7 @@ extension Ayah {
         ),
         Ayah(
             id: 50,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 160,
@@ -483,6 +545,7 @@ extension Ayah {
         ),
         Ayah(
             id: 51,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 173,
@@ -492,6 +555,7 @@ extension Ayah {
         ),
         Ayah(
             id: 52,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 185,
@@ -501,6 +565,7 @@ extension Ayah {
         ),
         Ayah(
             id: 53,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 191,
@@ -510,6 +575,7 @@ extension Ayah {
         ),
         Ayah(
             id: 54,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 193,
@@ -519,6 +585,7 @@ extension Ayah {
         ),
         Ayah(
             id: 55,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 194,
@@ -528,6 +595,7 @@ extension Ayah {
         ),
         Ayah(
             id: 56,
+            surahNumber: 3,
             surahName: "Ali 'Imran",
             surahNameArabic: "آل عمران",
             ayahNumber: 200,
@@ -537,6 +605,7 @@ extension Ayah {
         ),
         Ayah(
             id: 57,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 1,
@@ -546,6 +615,7 @@ extension Ayah {
         ),
         Ayah(
             id: 58,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 28,
@@ -555,6 +625,7 @@ extension Ayah {
         ),
         Ayah(
             id: 59,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 36,
@@ -564,6 +635,7 @@ extension Ayah {
         ),
         Ayah(
             id: 60,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 40,
@@ -573,6 +645,7 @@ extension Ayah {
         ),
         Ayah(
             id: 61,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 58,
@@ -582,6 +655,7 @@ extension Ayah {
         ),
         Ayah(
             id: 62,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 86,
@@ -591,6 +665,7 @@ extension Ayah {
         ),
         Ayah(
             id: 63,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 110,
@@ -600,6 +675,7 @@ extension Ayah {
         ),
         Ayah(
             id: 64,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 135,
@@ -609,6 +685,7 @@ extension Ayah {
         ),
         Ayah(
             id: 65,
+            surahNumber: 4,
             surahName: "An-Nisa",
             surahNameArabic: "النساء",
             ayahNumber: 147,
@@ -618,6 +695,7 @@ extension Ayah {
         ),
         Ayah(
             id: 66,
+            surahNumber: 5,
             surahName: "Al-Ma'idah",
             surahNameArabic: "المائدة",
             ayahNumber: 2,
@@ -627,6 +705,7 @@ extension Ayah {
         ),
         Ayah(
             id: 67,
+            surahNumber: 5,
             surahName: "Al-Ma'idah",
             surahNameArabic: "المائدة",
             ayahNumber: 8,
@@ -636,6 +715,7 @@ extension Ayah {
         ),
         Ayah(
             id: 68,
+            surahNumber: 5,
             surahName: "Al-Ma'idah",
             surahNameArabic: "المائدة",
             ayahNumber: 16,
@@ -645,6 +725,7 @@ extension Ayah {
         ),
         Ayah(
             id: 69,
+            surahNumber: 5,
             surahName: "Al-Ma'idah",
             surahNameArabic: "المائدة",
             ayahNumber: 32,
@@ -654,6 +735,7 @@ extension Ayah {
         ),
         Ayah(
             id: 70,
+            surahNumber: 5,
             surahName: "Al-Ma'idah",
             surahNameArabic: "المائدة",
             ayahNumber: 35,
@@ -663,6 +745,7 @@ extension Ayah {
         ),
         Ayah(
             id: 71,
+            surahNumber: 5,
             surahName: "Al-Ma'idah",
             surahNameArabic: "المائدة",
             ayahNumber: 119,
@@ -672,6 +755,7 @@ extension Ayah {
         ),
         Ayah(
             id: 72,
+            surahNumber: 6,
             surahName: "Al-An'am",
             surahNameArabic: "الأنعام",
             ayahNumber: 17,
@@ -681,6 +765,7 @@ extension Ayah {
         ),
         Ayah(
             id: 73,
+            surahNumber: 6,
             surahName: "Al-An'am",
             surahNameArabic: "الأنعام",
             ayahNumber: 32,
@@ -690,6 +775,7 @@ extension Ayah {
         ),
         Ayah(
             id: 74,
+            surahNumber: 6,
             surahName: "Al-An'am",
             surahNameArabic: "الأنعام",
             ayahNumber: 54,
@@ -699,6 +785,7 @@ extension Ayah {
         ),
         Ayah(
             id: 75,
+            surahNumber: 6,
             surahName: "Al-An'am",
             surahNameArabic: "الأنعام",
             ayahNumber: 59,
@@ -708,6 +795,7 @@ extension Ayah {
         ),
         Ayah(
             id: 76,
+            surahNumber: 6,
             surahName: "Al-An'am",
             surahNameArabic: "الأنعام",
             ayahNumber: 162,
@@ -717,6 +805,7 @@ extension Ayah {
         ),
         Ayah(
             id: 77,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 23,
@@ -726,6 +815,7 @@ extension Ayah {
         ),
         Ayah(
             id: 78,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 43,
@@ -735,6 +825,7 @@ extension Ayah {
         ),
         Ayah(
             id: 79,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 54,
@@ -744,6 +835,7 @@ extension Ayah {
         ),
         Ayah(
             id: 80,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 56,
@@ -753,6 +845,7 @@ extension Ayah {
         ),
         Ayah(
             id: 81,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 156,
@@ -762,6 +855,7 @@ extension Ayah {
         ),
         Ayah(
             id: 82,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 180,
@@ -771,6 +865,7 @@ extension Ayah {
         ),
         Ayah(
             id: 83,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 199,
@@ -780,6 +875,7 @@ extension Ayah {
         ),
         Ayah(
             id: 84,
+            surahNumber: 7,
             surahName: "Al-A'raf",
             surahNameArabic: "الأعراف",
             ayahNumber: 205,
@@ -789,6 +885,7 @@ extension Ayah {
         ),
         Ayah(
             id: 85,
+            surahNumber: 8,
             surahName: "Al-Anfal",
             surahNameArabic: "الأنفال",
             ayahNumber: 2,
@@ -798,6 +895,7 @@ extension Ayah {
         ),
         Ayah(
             id: 86,
+            surahNumber: 8,
             surahName: "Al-Anfal",
             surahNameArabic: "الأنفال",
             ayahNumber: 46,
@@ -807,6 +905,7 @@ extension Ayah {
         ),
         Ayah(
             id: 87,
+            surahNumber: 9,
             surahName: "At-Tawbah",
             surahNameArabic: "التوبة",
             ayahNumber: 40,
@@ -816,6 +915,7 @@ extension Ayah {
         ),
         Ayah(
             id: 88,
+            surahNumber: 9,
             surahName: "At-Tawbah",
             surahNameArabic: "التوبة",
             ayahNumber: 51,
@@ -825,6 +925,7 @@ extension Ayah {
         ),
         Ayah(
             id: 89,
+            surahNumber: 9,
             surahName: "At-Tawbah",
             surahNameArabic: "التوبة",
             ayahNumber: 119,
@@ -834,6 +935,7 @@ extension Ayah {
         ),
         Ayah(
             id: 90,
+            surahNumber: 9,
             surahName: "At-Tawbah",
             surahNameArabic: "التوبة",
             ayahNumber: 128,
@@ -843,6 +945,7 @@ extension Ayah {
         ),
         Ayah(
             id: 91,
+            surahNumber: 9,
             surahName: "At-Tawbah",
             surahNameArabic: "التوبة",
             ayahNumber: 129,
@@ -852,6 +955,7 @@ extension Ayah {
         ),
         Ayah(
             id: 92,
+            surahNumber: 10,
             surahName: "Yunus",
             surahNameArabic: "يونس",
             ayahNumber: 57,
@@ -861,6 +965,7 @@ extension Ayah {
         ),
         Ayah(
             id: 93,
+            surahNumber: 10,
             surahName: "Yunus",
             surahNameArabic: "يونس",
             ayahNumber: 62,
@@ -870,6 +975,7 @@ extension Ayah {
         ),
         Ayah(
             id: 94,
+            surahNumber: 10,
             surahName: "Yunus",
             surahNameArabic: "يونس",
             ayahNumber: 107,
@@ -879,6 +985,7 @@ extension Ayah {
         ),
         Ayah(
             id: 95,
+            surahNumber: 11,
             surahName: "Hud",
             surahNameArabic: "هود",
             ayahNumber: 88,
@@ -888,6 +995,7 @@ extension Ayah {
         ),
         Ayah(
             id: 96,
+            surahNumber: 11,
             surahName: "Hud",
             surahNameArabic: "هود",
             ayahNumber: 114,
@@ -897,6 +1005,7 @@ extension Ayah {
         ),
         Ayah(
             id: 97,
+            surahNumber: 12,
             surahName: "Yusuf",
             surahNameArabic: "يوسف",
             ayahNumber: 18,
@@ -906,6 +1015,7 @@ extension Ayah {
         ),
         Ayah(
             id: 98,
+            surahNumber: 12,
             surahName: "Yusuf",
             surahNameArabic: "يوسف",
             ayahNumber: 64,
@@ -915,6 +1025,7 @@ extension Ayah {
         ),
         Ayah(
             id: 99,
+            surahNumber: 12,
             surahName: "Yusuf",
             surahNameArabic: "يوسف",
             ayahNumber: 86,
@@ -924,6 +1035,7 @@ extension Ayah {
         ),
         Ayah(
             id: 100,
+            surahNumber: 12,
             surahName: "Yusuf",
             surahNameArabic: "يوسف",
             ayahNumber: 87,
@@ -933,6 +1045,7 @@ extension Ayah {
         ),
         Ayah(
             id: 101,
+            surahNumber: 12,
             surahName: "Yusuf",
             surahNameArabic: "يوسف",
             ayahNumber: 101,
@@ -942,6 +1055,7 @@ extension Ayah {
         ),
         Ayah(
             id: 102,
+            surahNumber: 13,
             surahName: "Ar-Ra'd",
             surahNameArabic: "الرعد",
             ayahNumber: 11,
@@ -951,6 +1065,7 @@ extension Ayah {
         ),
         Ayah(
             id: 103,
+            surahNumber: 13,
             surahName: "Ar-Ra'd",
             surahNameArabic: "الرعد",
             ayahNumber: 28,
@@ -960,6 +1075,7 @@ extension Ayah {
         ),
         Ayah(
             id: 104,
+            surahNumber: 14,
             surahName: "Ibrahim",
             surahNameArabic: "إبراهيم",
             ayahNumber: 7,
@@ -969,6 +1085,7 @@ extension Ayah {
         ),
         Ayah(
             id: 105,
+            surahNumber: 14,
             surahName: "Ibrahim",
             surahNameArabic: "إبراهيم",
             ayahNumber: 27,
@@ -978,6 +1095,7 @@ extension Ayah {
         ),
         Ayah(
             id: 106,
+            surahNumber: 14,
             surahName: "Ibrahim",
             surahNameArabic: "إبراهيم",
             ayahNumber: 40,
@@ -987,6 +1105,7 @@ extension Ayah {
         ),
         Ayah(
             id: 107,
+            surahNumber: 14,
             surahName: "Ibrahim",
             surahNameArabic: "إبراهيم",
             ayahNumber: 41,
@@ -996,6 +1115,7 @@ extension Ayah {
         ),
         Ayah(
             id: 108,
+            surahNumber: 15,
             surahName: "Al-Hijr",
             surahNameArabic: "الحجر",
             ayahNumber: 9,
@@ -1005,6 +1125,7 @@ extension Ayah {
         ),
         Ayah(
             id: 109,
+            surahNumber: 15,
             surahName: "Al-Hijr",
             surahNameArabic: "الحجر",
             ayahNumber: 49,
@@ -1014,6 +1135,7 @@ extension Ayah {
         ),
         Ayah(
             id: 110,
+            surahNumber: 15,
             surahName: "Al-Hijr",
             surahNameArabic: "الحجر",
             ayahNumber: 98,
@@ -1023,6 +1145,7 @@ extension Ayah {
         ),
         Ayah(
             id: 111,
+            surahNumber: 15,
             surahName: "Al-Hijr",
             surahNameArabic: "الحجر",
             ayahNumber: 99,
@@ -1032,6 +1155,7 @@ extension Ayah {
         ),
         Ayah(
             id: 112,
+            surahNumber: 16,
             surahName: "An-Nahl",
             surahNameArabic: "النحل",
             ayahNumber: 90,
@@ -1041,6 +1165,7 @@ extension Ayah {
         ),
         Ayah(
             id: 113,
+            surahNumber: 16,
             surahName: "An-Nahl",
             surahNameArabic: "النحل",
             ayahNumber: 96,
@@ -1050,6 +1175,7 @@ extension Ayah {
         ),
         Ayah(
             id: 114,
+            surahNumber: 16,
             surahName: "An-Nahl",
             surahNameArabic: "النحل",
             ayahNumber: 97,
@@ -1059,6 +1185,7 @@ extension Ayah {
         ),
         Ayah(
             id: 115,
+            surahNumber: 16,
             surahName: "An-Nahl",
             surahNameArabic: "النحل",
             ayahNumber: 128,
@@ -1068,6 +1195,7 @@ extension Ayah {
         ),
         Ayah(
             id: 116,
+            surahNumber: 17,
             surahName: "Al-Isra",
             surahNameArabic: "الإسراء",
             ayahNumber: 23,
@@ -1077,6 +1205,7 @@ extension Ayah {
         ),
         Ayah(
             id: 117,
+            surahNumber: 17,
             surahName: "Al-Isra",
             surahNameArabic: "الإسراء",
             ayahNumber: 24,
@@ -1086,6 +1215,7 @@ extension Ayah {
         ),
         Ayah(
             id: 118,
+            surahNumber: 17,
             surahName: "Al-Isra",
             surahNameArabic: "الإسراء",
             ayahNumber: 70,
@@ -1095,6 +1225,7 @@ extension Ayah {
         ),
         Ayah(
             id: 119,
+            surahNumber: 17,
             surahName: "Al-Isra",
             surahNameArabic: "الإسراء",
             ayahNumber: 82,
@@ -1104,6 +1235,7 @@ extension Ayah {
         ),
         Ayah(
             id: 120,
+            surahNumber: 18,
             surahName: "Al-Kahf",
             surahNameArabic: "الكهف",
             ayahNumber: 10,
@@ -1113,6 +1245,7 @@ extension Ayah {
         ),
         Ayah(
             id: 121,
+            surahNumber: 18,
             surahName: "Al-Kahf",
             surahNameArabic: "الكهف",
             ayahNumber: 23,
@@ -1122,6 +1255,7 @@ extension Ayah {
         ),
         Ayah(
             id: 122,
+            surahNumber: 18,
             surahName: "Al-Kahf",
             surahNameArabic: "الكهف",
             ayahNumber: 24,
@@ -1131,6 +1265,7 @@ extension Ayah {
         ),
         Ayah(
             id: 123,
+            surahNumber: 18,
             surahName: "Al-Kahf",
             surahNameArabic: "الكهف",
             ayahNumber: 46,
@@ -1140,6 +1275,7 @@ extension Ayah {
         ),
         Ayah(
             id: 124,
+            surahNumber: 18,
             surahName: "Al-Kahf",
             surahNameArabic: "الكهف",
             ayahNumber: 109,
@@ -1149,6 +1285,7 @@ extension Ayah {
         ),
         Ayah(
             id: 125,
+            surahNumber: 18,
             surahName: "Al-Kahf",
             surahNameArabic: "الكهف",
             ayahNumber: 110,
@@ -1158,6 +1295,7 @@ extension Ayah {
         ),
         Ayah(
             id: 126,
+            surahNumber: 19,
             surahName: "Maryam",
             surahNameArabic: "مريم",
             ayahNumber: 96,
@@ -1167,6 +1305,7 @@ extension Ayah {
         ),
         Ayah(
             id: 127,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 14,
@@ -1176,6 +1315,7 @@ extension Ayah {
         ),
         Ayah(
             id: 128,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 25,
@@ -1185,6 +1325,7 @@ extension Ayah {
         ),
         Ayah(
             id: 129,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 26,
@@ -1194,6 +1335,7 @@ extension Ayah {
         ),
         Ayah(
             id: 130,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 46,
@@ -1203,6 +1345,7 @@ extension Ayah {
         ),
         Ayah(
             id: 131,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 114,
@@ -1212,6 +1355,7 @@ extension Ayah {
         ),
         Ayah(
             id: 132,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 130,
@@ -1221,6 +1365,7 @@ extension Ayah {
         ),
         Ayah(
             id: 133,
+            surahNumber: 20,
             surahName: "Ta-Ha",
             surahNameArabic: "طه",
             ayahNumber: 132,
@@ -1230,6 +1375,7 @@ extension Ayah {
         ),
         Ayah(
             id: 134,
+            surahNumber: 21,
             surahName: "Al-Anbiya",
             surahNameArabic: "الأنبياء",
             ayahNumber: 35,
@@ -1239,6 +1385,7 @@ extension Ayah {
         ),
         Ayah(
             id: 135,
+            surahNumber: 21,
             surahName: "Al-Anbiya",
             surahNameArabic: "الأنبياء",
             ayahNumber: 87,
@@ -1248,6 +1395,7 @@ extension Ayah {
         ),
         Ayah(
             id: 136,
+            surahNumber: 21,
             surahName: "Al-Anbiya",
             surahNameArabic: "الأنبياء",
             ayahNumber: 88,
@@ -1257,6 +1405,7 @@ extension Ayah {
         ),
         Ayah(
             id: 137,
+            surahNumber: 21,
             surahName: "Al-Anbiya",
             surahNameArabic: "الأنبياء",
             ayahNumber: 89,
@@ -1266,6 +1415,7 @@ extension Ayah {
         ),
         Ayah(
             id: 138,
+            surahNumber: 21,
             surahName: "Al-Anbiya",
             surahNameArabic: "الأنبياء",
             ayahNumber: 107,
@@ -1275,6 +1425,7 @@ extension Ayah {
         ),
         Ayah(
             id: 139,
+            surahNumber: 22,
             surahName: "Al-Hajj",
             surahNameArabic: "الحج",
             ayahNumber: 77,
@@ -1284,6 +1435,7 @@ extension Ayah {
         ),
         Ayah(
             id: 140,
+            surahNumber: 23,
             surahName: "Al-Mu'minun",
             surahNameArabic: "المؤمنون",
             ayahNumber: 1,
@@ -1293,6 +1445,7 @@ extension Ayah {
         ),
         Ayah(
             id: 141,
+            surahNumber: 23,
             surahName: "Al-Mu'minun",
             surahNameArabic: "المؤمنون",
             ayahNumber: 2,
@@ -1302,6 +1455,7 @@ extension Ayah {
         ),
         Ayah(
             id: 142,
+            surahNumber: 23,
             surahName: "Al-Mu'minun",
             surahNameArabic: "المؤمنون",
             ayahNumber: 97,
@@ -1311,6 +1465,7 @@ extension Ayah {
         ),
         Ayah(
             id: 143,
+            surahNumber: 23,
             surahName: "Al-Mu'minun",
             surahNameArabic: "المؤمنون",
             ayahNumber: 98,
@@ -1320,6 +1475,7 @@ extension Ayah {
         ),
         Ayah(
             id: 144,
+            surahNumber: 23,
             surahName: "Al-Mu'minun",
             surahNameArabic: "المؤمنون",
             ayahNumber: 118,
@@ -1329,6 +1485,7 @@ extension Ayah {
         ),
         Ayah(
             id: 145,
+            surahNumber: 24,
             surahName: "An-Nur",
             surahNameArabic: "النور",
             ayahNumber: 21,
@@ -1338,6 +1495,7 @@ extension Ayah {
         ),
         Ayah(
             id: 146,
+            surahNumber: 24,
             surahName: "An-Nur",
             surahNameArabic: "النور",
             ayahNumber: 35,
@@ -1347,6 +1505,7 @@ extension Ayah {
         ),
         Ayah(
             id: 147,
+            surahNumber: 24,
             surahName: "An-Nur",
             surahNameArabic: "النور",
             ayahNumber: 37,
@@ -1356,6 +1515,7 @@ extension Ayah {
         ),
         Ayah(
             id: 148,
+            surahNumber: 25,
             surahName: "Al-Furqan",
             surahNameArabic: "الفرقان",
             ayahNumber: 58,
@@ -1365,6 +1525,7 @@ extension Ayah {
         ),
         Ayah(
             id: 149,
+            surahNumber: 25,
             surahName: "Al-Furqan",
             surahNameArabic: "الفرقان",
             ayahNumber: 63,
@@ -1374,6 +1535,7 @@ extension Ayah {
         ),
         Ayah(
             id: 150,
+            surahNumber: 25,
             surahName: "Al-Furqan",
             surahNameArabic: "الفرقان",
             ayahNumber: 65,
@@ -1383,6 +1545,7 @@ extension Ayah {
         ),
         Ayah(
             id: 151,
+            surahNumber: 25,
             surahName: "Al-Furqan",
             surahNameArabic: "الفرقان",
             ayahNumber: 70,
@@ -1392,6 +1555,7 @@ extension Ayah {
         ),
         Ayah(
             id: 152,
+            surahNumber: 25,
             surahName: "Al-Furqan",
             surahNameArabic: "الفرقان",
             ayahNumber: 74,
@@ -1401,6 +1565,7 @@ extension Ayah {
         ),
         Ayah(
             id: 153,
+            surahNumber: 26,
             surahName: "Ash-Shu'ara",
             surahNameArabic: "الشعراء",
             ayahNumber: 80,
@@ -1410,6 +1575,7 @@ extension Ayah {
         ),
         Ayah(
             id: 154,
+            surahNumber: 26,
             surahName: "Ash-Shu'ara",
             surahNameArabic: "الشعراء",
             ayahNumber: 83,
@@ -1419,6 +1585,7 @@ extension Ayah {
         ),
         Ayah(
             id: 155,
+            surahNumber: 26,
             surahName: "Ash-Shu'ara",
             surahNameArabic: "الشعراء",
             ayahNumber: 88,
@@ -1428,6 +1595,7 @@ extension Ayah {
         ),
         Ayah(
             id: 156,
+            surahNumber: 26,
             surahName: "Ash-Shu'ara",
             surahNameArabic: "الشعراء",
             ayahNumber: 89,
@@ -1437,6 +1605,7 @@ extension Ayah {
         ),
         Ayah(
             id: 157,
+            surahNumber: 27,
             surahName: "An-Naml",
             surahNameArabic: "النمل",
             ayahNumber: 19,
@@ -1446,6 +1615,7 @@ extension Ayah {
         ),
         Ayah(
             id: 158,
+            surahNumber: 28,
             surahName: "Al-Qasas",
             surahNameArabic: "القصص",
             ayahNumber: 24,
@@ -1455,6 +1625,7 @@ extension Ayah {
         ),
         Ayah(
             id: 159,
+            surahNumber: 28,
             surahName: "Al-Qasas",
             surahNameArabic: "القصص",
             ayahNumber: 77,
@@ -1464,6 +1635,7 @@ extension Ayah {
         ),
         Ayah(
             id: 160,
+            surahNumber: 29,
             surahName: "Al-'Ankabut",
             surahNameArabic: "العنكبوت",
             ayahNumber: 45,
@@ -1473,6 +1645,7 @@ extension Ayah {
         ),
         Ayah(
             id: 161,
+            surahNumber: 29,
             surahName: "Al-'Ankabut",
             surahNameArabic: "العنكبوت",
             ayahNumber: 69,
@@ -1482,6 +1655,7 @@ extension Ayah {
         ),
         Ayah(
             id: 162,
+            surahNumber: 30,
             surahName: "Ar-Rum",
             surahNameArabic: "الروم",
             ayahNumber: 21,
@@ -1491,6 +1665,7 @@ extension Ayah {
         ),
         Ayah(
             id: 163,
+            surahNumber: 30,
             surahName: "Ar-Rum",
             surahNameArabic: "الروم",
             ayahNumber: 60,
@@ -1500,6 +1675,7 @@ extension Ayah {
         ),
         Ayah(
             id: 164,
+            surahNumber: 31,
             surahName: "Luqman",
             surahNameArabic: "لقمان",
             ayahNumber: 17,
@@ -1509,6 +1685,7 @@ extension Ayah {
         ),
         Ayah(
             id: 165,
+            surahNumber: 31,
             surahName: "Luqman",
             surahNameArabic: "لقمان",
             ayahNumber: 18,
@@ -1518,6 +1695,7 @@ extension Ayah {
         ),
         Ayah(
             id: 166,
+            surahNumber: 32,
             surahName: "As-Sajdah",
             surahNameArabic: "السجدة",
             ayahNumber: 16,
@@ -1527,6 +1705,7 @@ extension Ayah {
         ),
         Ayah(
             id: 167,
+            surahNumber: 33,
             surahName: "Al-Ahzab",
             surahNameArabic: "الأحزاب",
             ayahNumber: 35,
@@ -1536,6 +1715,7 @@ extension Ayah {
         ),
         Ayah(
             id: 168,
+            surahNumber: 33,
             surahName: "Al-Ahzab",
             surahNameArabic: "الأحزاب",
             ayahNumber: 41,
@@ -1545,6 +1725,7 @@ extension Ayah {
         ),
         Ayah(
             id: 169,
+            surahNumber: 33,
             surahName: "Al-Ahzab",
             surahNameArabic: "الأحزاب",
             ayahNumber: 42,
@@ -1554,6 +1735,7 @@ extension Ayah {
         ),
         Ayah(
             id: 170,
+            surahNumber: 33,
             surahName: "Al-Ahzab",
             surahNameArabic: "الأحزاب",
             ayahNumber: 56,
@@ -1563,6 +1745,7 @@ extension Ayah {
         ),
         Ayah(
             id: 171,
+            surahNumber: 33,
             surahName: "Al-Ahzab",
             surahNameArabic: "الأحزاب",
             ayahNumber: 70,
@@ -1572,6 +1755,7 @@ extension Ayah {
         ),
         Ayah(
             id: 172,
+            surahNumber: 33,
             surahName: "Al-Ahzab",
             surahNameArabic: "الأحزاب",
             ayahNumber: 71,
@@ -1581,6 +1765,7 @@ extension Ayah {
         ),
         Ayah(
             id: 173,
+            surahNumber: 35,
             surahName: "Fatir",
             surahNameArabic: "فاطر",
             ayahNumber: 2,
@@ -1590,6 +1775,7 @@ extension Ayah {
         ),
         Ayah(
             id: 174,
+            surahNumber: 35,
             surahName: "Fatir",
             surahNameArabic: "فاطر",
             ayahNumber: 10,
@@ -1599,6 +1785,7 @@ extension Ayah {
         ),
         Ayah(
             id: 175,
+            surahNumber: 35,
             surahName: "Fatir",
             surahNameArabic: "فاطر",
             ayahNumber: 15,
@@ -1608,6 +1795,7 @@ extension Ayah {
         ),
         Ayah(
             id: 176,
+            surahNumber: 36,
             surahName: "Ya-Sin",
             surahNameArabic: "يس",
             ayahNumber: 58,
@@ -1617,6 +1805,7 @@ extension Ayah {
         ),
         Ayah(
             id: 177,
+            surahNumber: 36,
             surahName: "Ya-Sin",
             surahNameArabic: "يس",
             ayahNumber: 82,
@@ -1626,6 +1815,7 @@ extension Ayah {
         ),
         Ayah(
             id: 178,
+            surahNumber: 39,
             surahName: "Az-Zumar",
             surahNameArabic: "الزمر",
             ayahNumber: 9,
@@ -1635,6 +1825,7 @@ extension Ayah {
         ),
         Ayah(
             id: 179,
+            surahNumber: 39,
             surahName: "Az-Zumar",
             surahNameArabic: "الزمر",
             ayahNumber: 10,
@@ -1644,6 +1835,7 @@ extension Ayah {
         ),
         Ayah(
             id: 180,
+            surahNumber: 39,
             surahName: "Az-Zumar",
             surahNameArabic: "الزمر",
             ayahNumber: 22,
@@ -1653,6 +1845,7 @@ extension Ayah {
         ),
         Ayah(
             id: 181,
+            surahNumber: 39,
             surahName: "Az-Zumar",
             surahNameArabic: "الزمر",
             ayahNumber: 36,
@@ -1662,6 +1855,7 @@ extension Ayah {
         ),
         Ayah(
             id: 182,
+            surahNumber: 39,
             surahName: "Az-Zumar",
             surahNameArabic: "الزمر",
             ayahNumber: 53,
@@ -1671,6 +1865,7 @@ extension Ayah {
         ),
         Ayah(
             id: 183,
+            surahNumber: 40,
             surahName: "Ghafir",
             surahNameArabic: "غافر",
             ayahNumber: 44,
@@ -1680,6 +1875,7 @@ extension Ayah {
         ),
         Ayah(
             id: 184,
+            surahNumber: 40,
             surahName: "Ghafir",
             surahNameArabic: "غافر",
             ayahNumber: 60,
@@ -1689,6 +1885,7 @@ extension Ayah {
         ),
         Ayah(
             id: 185,
+            surahNumber: 41,
             surahName: "Fussilat",
             surahNameArabic: "فصلت",
             ayahNumber: 30,
@@ -1698,6 +1895,7 @@ extension Ayah {
         ),
         Ayah(
             id: 186,
+            surahNumber: 41,
             surahName: "Fussilat",
             surahNameArabic: "فصلت",
             ayahNumber: 33,
@@ -1707,6 +1905,7 @@ extension Ayah {
         ),
         Ayah(
             id: 187,
+            surahNumber: 41,
             surahName: "Fussilat",
             surahNameArabic: "فصلت",
             ayahNumber: 34,
@@ -1716,6 +1915,7 @@ extension Ayah {
         ),
         Ayah(
             id: 188,
+            surahNumber: 42,
             surahName: "Ash-Shura",
             surahNameArabic: "الشورى",
             ayahNumber: 19,
@@ -1725,6 +1925,7 @@ extension Ayah {
         ),
         Ayah(
             id: 189,
+            surahNumber: 42,
             surahName: "Ash-Shura",
             surahNameArabic: "الشورى",
             ayahNumber: 23,
@@ -1734,6 +1935,7 @@ extension Ayah {
         ),
         Ayah(
             id: 190,
+            surahNumber: 42,
             surahName: "Ash-Shura",
             surahNameArabic: "الشورى",
             ayahNumber: 28,
@@ -1743,6 +1945,7 @@ extension Ayah {
         ),
         Ayah(
             id: 191,
+            surahNumber: 46,
             surahName: "Al-Ahqaf",
             surahNameArabic: "الأحقاف",
             ayahNumber: 13,
@@ -1752,6 +1955,7 @@ extension Ayah {
         ),
         Ayah(
             id: 192,
+            surahNumber: 46,
             surahName: "Al-Ahqaf",
             surahNameArabic: "الأحقاف",
             ayahNumber: 15,
@@ -1761,6 +1965,7 @@ extension Ayah {
         ),
         Ayah(
             id: 193,
+            surahNumber: 47,
             surahName: "Muhammad",
             surahNameArabic: "محمد",
             ayahNumber: 7,
@@ -1770,6 +1975,7 @@ extension Ayah {
         ),
         Ayah(
             id: 194,
+            surahNumber: 48,
             surahName: "Al-Fath",
             surahNameArabic: "الفتح",
             ayahNumber: 4,
@@ -1779,6 +1985,7 @@ extension Ayah {
         ),
         Ayah(
             id: 195,
+            surahNumber: 48,
             surahName: "Al-Fath",
             surahNameArabic: "الفتح",
             ayahNumber: 29,
@@ -1788,6 +1995,7 @@ extension Ayah {
         ),
         Ayah(
             id: 196,
+            surahNumber: 49,
             surahName: "Al-Hujurat",
             surahNameArabic: "الحجرات",
             ayahNumber: 10,
@@ -1797,6 +2005,7 @@ extension Ayah {
         ),
         Ayah(
             id: 197,
+            surahNumber: 49,
             surahName: "Al-Hujurat",
             surahNameArabic: "الحجرات",
             ayahNumber: 12,
@@ -1806,6 +2015,7 @@ extension Ayah {
         ),
         Ayah(
             id: 198,
+            surahNumber: 49,
             surahName: "Al-Hujurat",
             surahNameArabic: "الحجرات",
             ayahNumber: 13,
@@ -1815,6 +2025,7 @@ extension Ayah {
         ),
         Ayah(
             id: 199,
+            surahNumber: 50,
             surahName: "Qaf",
             surahNameArabic: "ق",
             ayahNumber: 16,
@@ -1824,6 +2035,7 @@ extension Ayah {
         ),
         Ayah(
             id: 200,
+            surahNumber: 50,
             surahName: "Qaf",
             surahNameArabic: "ق",
             ayahNumber: 39,

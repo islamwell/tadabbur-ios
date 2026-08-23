@@ -61,6 +61,13 @@
 		<string>shortcuts</string>
 	</array>
 
+	<!-- App Transport Security -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
 	<!-- Privacy usage descriptions -->
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Tadabbur uses notifications to show you Quranic verses on your lock screen every 30 minutes.</string>
