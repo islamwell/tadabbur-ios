@@ -1,0 +1,17 @@
+# Xcode
+## User settings
+xcuserdata/
+*.xcuserstate
+project.pbxproj.backup
+
+## Build generated
+build/
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+## macOS
+.DS_Store
+*.swp
+*~
