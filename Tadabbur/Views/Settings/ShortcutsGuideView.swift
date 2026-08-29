@@ -1,425 +1,532 @@
 import SwiftUI
 
-// MARK: - ShortcutsGuideView
+// MARK: - LockScreenWidgetGuideView (Widget Wizard)
 
-/// Interactive visual guide that explains how to configure Apple Shortcuts
-/// personal automation so Tadabbur auto-opens when opening daily apps or on a schedule.
-struct ShortcutsGuideView: View {
+/// An interactive, visual step-by-step wizard guiding users on how to add
+/// the Tadabbur Quranic Ayah widget to their iPhone Lock Screen.
+struct LockScreenWidgetGuideView: View {
 
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedStep = 0
-    @State private var copiedName = false
+    @State private var currentStep = 0
 
-    private let steps: [(number: Int, icon: String, title: String, subtitle: String, detail: String, buttonHighlight: String)] = [
-        (
-            1,
-            "arrow.up.forward.app",
-            "Open Apple Shortcuts",
-            "Launch the built-in Shortcuts app",
-            "Tap the 'Open Shortcuts' button below or open the Shortcuts app from your Home Screen.",
-            "Open Shortcuts App"
-        ),
-        (
-            2,
-            "slider.horizontal.2.square",
-            "Tap 'Automation' Tab",
-            "Switch to Automations at the bottom",
-            "In the bottom navigation bar of the Shortcuts app, tap the 'Automation' tab, then tap the '+' (or 'New Automation') button.",
-            "Bottom Bar → Automation → +"
-        ),
-        (
-            3,
-            "app.badge.checkmark",
-            "Choose 'App' (Habit Interceptor)",
-            "Select which apps trigger a reflection",
-            "In the trigger list, tap 'App'. Choose 'Is Opened' and pick your most frequently used apps (e.g., Safari, Social Media, or Games).",
-            "Trigger: App → Is Opened"
-        ),
-        (
-            4,
-            "bolt.badge.clock.fill",
-            "Set 'Run Immediately'",
-            "Enable seamless auto-launching",
-            "Select 'Run Immediately' and turn off 'Notify When Run' so Tadabbur opens instantly without asking each time.",
-            "Select: Run Immediately"
-        ),
-        (
-            5,
-            "app.gift.fill",
-            "Select Action: Open Tadabbur",
-            "Choose Tadabbur as the target app",
-            "Tap Next → Add Action → Search for 'Open App' → Tap 'App' and choose 'Tadabbur'. Done!",
-            "Action: Open App → Tadabbur"
-        )
-    ]
+    private let totalSteps = 5
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(uiColor: .systemGroupedBackground)
-                    .ignoresSafeArea()
+                // Dark background matching app theme
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.04, green: 0.12, blue: 0.16),
+                        Color(red: 0.02, green: 0.06, blue: 0.09)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Hero Header
-                        heroHeader
+                VStack(spacing: 0) {
+                    // Top Progress & Step Indicators
+                    stepProgressBar
+                        .padding(.horizontal, 24)
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
 
-                        // Open Shortcuts & Copy Name Action Bar
-                        actionButtonsBar
-
-                        // Interactive Visual Step Carousel / Mockup
-                        interactiveStepMockup
-
-                        // Step-by-Step Checklist
-                        checklistSection
-
-                        // Alternative Methods Card
-                        alternativeMethodsSection
-
-                        Spacer(minLength: 32)
+                    // Swipeable Page Views
+                    TabView(selection: $currentStep) {
+                        stepOneView.tag(0)
+                        stepTwoView.tag(1)
+                        stepThreeView.tag(2)
+                        stepFourView.tag(3)
+                        stepFiveView.tag(4)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+
+                    // Bottom Navigation Buttons
+                    bottomNavigationBar
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
                 }
             }
-            .navigationTitle("Automation Setup")
+            .navigationTitle("Lock Screen Setup")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
-                    .fontWeight(.semibold)
-                    .tint(Color("EmeraldLight"))
-                }
-            }
-        }
-    }
-
-    // MARK: - Hero Header
-
-    private var heroHeader: some View {
-        VStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(Color("EmeraldLight").opacity(0.15))
-                    .frame(width: 72, height: 72)
-
-                Image(systemName: "sparkles.rectangle.stack.fill")
-                    .font(.system(size: 34))
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(Color("EmeraldLight"))
+                }
             }
-
-            Text("Auto-Open Automation")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.primary)
-
-            Text("Apple does not have a direct 'When unlocked' trigger, but you can trigger Tadabbur automatically **when opening specific apps** or on a **daily schedule**.")
-                .font(.footnote)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 8)
         }
     }
 
-    // MARK: - Action Buttons Bar
+    // MARK: - Progress Bar
 
-    private var actionButtonsBar: some View {
-        VStack(spacing: 10) {
-            // Main Open Shortcuts Button
-            Button {
-                openShortcutsWithNotificationCheatSheet()
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "arrow.up.forward.app.fill")
-                        .font(.headline)
-                    Text("Open Shortcuts App")
-                        .font(.headline)
-                    Spacer()
-                    Image(systemName: "bell.badge.fill")
-                        .font(.caption)
-                    Text("Includes Cheat Sheet")
-                        .font(.caption2.bold())
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color("EmeraldLight"))
-                        .shadow(color: Color("EmeraldLight").opacity(0.3), radius: 6, y: 3)
-                )
+    private var stepProgressBar: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text("STEP \(currentStep + 1) OF \(totalSteps)")
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .tracking(1.5)
+                    .foregroundColor(Color("EmeraldLight"))
+
+                Spacer()
+
+                Text(stepTitles[currentStep])
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.7))
             }
-            .buttonStyle(.plain)
 
-            // Copy App Name Button
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.12))
+                        .frame(height: 4)
+
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color("EmeraldLight"), Color(red: 0.20, green: 0.90, blue: 0.65)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geo.size.width * CGFloat(currentStep + 1) / CGFloat(totalSteps), height: 4)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: currentStep)
+                }
+            }
+            .frame(height: 4)
+        }
+    }
+
+    private var stepTitles: [String] {
+        [
+            "Long Press Lock Screen",
+            "Tap Customize",
+            "Tap Widget Slot",
+            "Select Tadabbur",
+            "Save & Complete"
+        ]
+    }
+
+    // MARK: - Step 1: Long Press Lock Screen
+
+    private var stepOneView: some View {
+        wizardCard(
+            badge: "STEP 1",
+            icon: "hand.tap.fill",
+            title: "Long Press Lock Screen",
+            description: "Wake your iPhone. Touch and hold anywhere on an empty area of your Lock Screen until the gallery zooms out and 'Customize' appears."
+        ) {
+            // Visual Mockup of Step 1
+            VStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
+
+                    VStack(spacing: 12) {
+                        // Clock preview
+                        Text("09:41")
+                            .font(.system(size: 32, weight: .light, design: .rounded))
+                            .foregroundColor(.white.opacity(0.9))
+
+                        // Touch pulse animation mockup
+                        ZStack {
+                            Circle()
+                                .stroke(Color("EmeraldLight").opacity(0.3), lineWidth: 2)
+                                .frame(width: 64, height: 64)
+
+                            Circle()
+                                .fill(Color("EmeraldLight").opacity(0.2))
+                                .frame(width: 48, height: 48)
+
+                            Image(systemName: "hand.point.up.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(Color("EmeraldLight"))
+                        }
+
+                        Text("Press & Hold Here")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("EmeraldLight"))
+                    }
+                    .padding(20)
+                }
+                .frame(height: 200)
+
+                tipBox(text: "💡 Make sure your iPhone is unlocked with Face ID or Touch ID first.")
+            }
+        }
+    }
+
+    // MARK: - Step 2: Tap Customize
+
+    private var stepTwoView: some View {
+        wizardCard(
+            badge: "STEP 2",
+            icon: "paintbrush.fill",
+            title: "Tap 'Customize'",
+            description: "Tap the Customize button at the bottom of the screen, then select the Lock Screen card on the left."
+        ) {
+            VStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
+
+                    VStack(spacing: 16) {
+                        HStack(spacing: 16) {
+                            // Left Lock Screen (Highlighted)
+                            VStack(spacing: 6) {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color("EmeraldDeep"))
+                                    .frame(width: 70, height: 100)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color("EmeraldLight"), lineWidth: 2)
+                                    )
+                                    .overlay(
+                                        Image(systemName: "lock.fill")
+                                            .foregroundColor(.white.opacity(0.8))
+                                    )
+                                Text("Lock Screen")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(Color("EmeraldLight"))
+                            }
+
+                            // Right Home Screen
+                            VStack(spacing: 6) {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white.opacity(0.08))
+                                    .frame(width: 70, height: 100)
+                                    .overlay(
+                                        Image(systemName: "apps.iphone")
+                                            .foregroundColor(.white.opacity(0.4))
+                                    )
+                                Text("Home Screen")
+                                    .font(.system(size: 10, weight: .regular))
+                                    .foregroundColor(.white.opacity(0.4))
+                            }
+                        }
+
+                        // Customize button pill
+                        HStack(spacing: 6) {
+                            Image(systemName: "paintbrush")
+                            Text("Customize")
+                                .fontWeight(.semibold)
+                        }
+                        .font(.system(size: 13))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .background(Capsule().fill(Color("EmeraldLight")))
+                    }
+                    .padding(16)
+                }
+                .frame(height: 200)
+
+                tipBox(text: "Tap the Lock Screen preview on the left side to enter widget editing.")
+            }
+        }
+    }
+
+    // MARK: - Step 3: Tap Widget Slot
+
+    private var stepThreeView: some View {
+        wizardCard(
+            badge: "STEP 3",
+            icon: "plus.rectangle.dashed",
+            title: "Tap the Widget Box",
+            description: "Tap the rectangular dashed box directly underneath the clock. This opens the iOS Widget Gallery."
+        ) {
+            VStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
+
+                    VStack(spacing: 12) {
+                        Text("09:41")
+                            .font(.system(size: 34, weight: .light, design: .rounded))
+                            .foregroundColor(.white.opacity(0.9))
+
+                        // Widget box with pulsating border
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(Color("EmeraldLight"))
+                            Text("Add Widgets")
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color("EmeraldLight"))
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color("EmeraldLight").opacity(0.15))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(Color("EmeraldLight"), style: StrokeStyle(lineWidth: 1.5, dash: [5]))
+                                )
+                        )
+                    }
+                    .padding(20)
+                }
+                .frame(height: 200)
+
+                tipBox(text: "You can also tap the area directly above the clock for the compact inline verse widget.")
+            }
+        }
+    }
+
+    // MARK: - Step 4: Select Tadabbur
+
+    private var stepFourView: some View {
+        wizardCard(
+            badge: "STEP 4",
+            icon: "rectangle.badge.sparkle",
+            title: "Select Tadabbur Widget",
+            description: "Scroll down the list of apps and tap Tadabbur. Tap the Wide Rectangular Widget to add it below your clock."
+        ) {
+            VStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(Color("EmeraldLight"))
+                            Text("Tadabbur Daily Ayah")
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Spacer()
+                            Text("2×1 Wide")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(Color("EmeraldLight"))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color("EmeraldLight").opacity(0.2)))
+                        }
+
+                        // Wide Widget Card Mockup
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text("Al-Fatiha · 5")
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Text("الفاتحة")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .environment(\.layoutDirection, .rightToLeft)
+                            }
+
+                            Text("إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                                .environment(\.layoutDirection, .rightToLeft)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+
+                            Text("It is You we worship and You we ask for help.")
+                                .font(.system(size: 10))
+                                .foregroundColor(.white.opacity(0.75))
+                                .lineLimit(1)
+                        }
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.black.opacity(0.4))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color("EmeraldLight").opacity(0.6), lineWidth: 1)
+                                )
+                        )
+                    }
+                    .padding(16)
+                }
+                .frame(height: 200)
+
+                tipBox(text: "The widget features high-contrast Arabic Uthmani calligraphy and updates every 40 minutes.")
+            }
+        }
+    }
+
+    // MARK: - Step 5: Save & Done
+
+    private var stepFiveView: some View {
+        wizardCard(
+            badge: "STEP 5",
+            icon: "checkmark.seal.fill",
+            title: "Tap 'Done' to Finish",
+            description: "Tap Done in the top-right corner to save your new Lock Screen. Your verses will now rotate automatically every 40 minutes!"
+        ) {
+            VStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
+
+                    VStack(spacing: 14) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 36))
+                            .foregroundColor(Color("EmeraldLight"))
+
+                        Text("You're All Set!")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+
+                        Text("Every time you pick up your iPhone, a curated Quranic reflection will be waiting on your Lock Screen.")
+                            .font(.system(size: 12))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.horizontal, 16)
+                    }
+                    .padding(20)
+                }
+                .frame(height: 200)
+
+                tipBox(text: "Tap the widget anytime to jump directly into Full Reflection Mode with Nasser Al-Qatami recitation.")
+            }
+        }
+    }
+
+    // MARK: - Reusable Wizard Card Layout
+
+    private func wizardCard<Content: View>(
+        badge: String,
+        icon: String,
+        title: String,
+        description: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                // Header
+                HStack(spacing: 10) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Color("EmeraldLight"))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(title)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                }
+
+                Text(description)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.white.opacity(0.85))
+                    .lineSpacing(4)
+
+                // Interactive / Visual Content
+                content()
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 8)
+        }
+    }
+
+    private func tipBox(text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "info.circle.fill")
+                .foregroundColor(Color("EmeraldLight"))
+                .font(.system(size: 13))
+            Text(text)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.white.opacity(0.85))
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color("EmeraldLight").opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color("EmeraldLight").opacity(0.25), lineWidth: 1)
+                )
+        )
+    }
+
+    // MARK: - Bottom Navigation Bar
+
+    private var bottomNavigationBar: some View {
+        HStack(spacing: 12) {
+            // Previous Button
+            if currentStep > 0 {
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                        currentStep -= 1
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        Capsule()
+                            .fill(Color.white.opacity(0.1))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+
+            Spacer()
+
+            // Next / Finish Button
             Button {
-                UIPasteboard.general.string = "Tadabbur"
-                copiedName = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    copiedName = false
+                if currentStep < totalSteps - 1 {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                        currentStep += 1
+                    }
+                } else {
+                    dismiss()
                 }
             } label: {
                 HStack(spacing: 6) {
-                    Image(systemName: copiedName ? "checkmark.circle.fill" : "doc.on.doc")
-                        .foregroundColor(copiedName ? .green : Color("EmeraldLight"))
-                    Text(copiedName ? "App name 'Tadabbur' copied to clipboard!" : "Copy App Name ('Tadabbur')")
-                        .font(.subheadline)
-                        .foregroundColor(.primary)
+                    Text(currentStep == totalSteps - 1 ? "Got It!" : "Next Step")
+                    Image(systemName: currentStep == totalSteps - 1 ? "checkmark" : "chevron.right")
                 }
-                .padding(.vertical, 6)
-            }
-        }
-    }
-
-    // MARK: - Interactive Visual Step Mockup
-
-    private var interactiveStepMockup: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("VISUAL PREVIEW (STEP \(selectedStep + 1) OF \(steps.count))")
-                    .font(.caption.bold())
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("Tap steps below")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, 4)
-
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color("EmeraldLight"))
-                            .frame(width: 44, height: 44)
-
-                        Image(systemName: steps[selectedStep].icon)
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Step \(steps[selectedStep].number): \(steps[selectedStep].title)")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.primary)
-
-                        Text(steps[selectedStep].subtitle)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(Color("EmeraldLight"))
-                    }
-                }
-
-                Text(steps[selectedStep].detail)
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                // Highlighted Action Box
-                HStack {
-                    Image(systemName: "hand.tap.fill")
-                        .foregroundColor(Color("EmeraldLight"))
-                    Text("Target: \(steps[selectedStep].buttonHighlight)")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.primary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color("EmeraldLight").opacity(0.12))
+                    Capsule()
+                        .fill(Color("EmeraldLight"))
                 )
-
-                // Step Navigation Controls
-                HStack {
-                    Button {
-                        if selectedStep > 0 {
-                            withAnimation(.easeInOut) { selectedStep -= 1 }
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Prev")
-                        }
-                        .font(.footnote.weight(.semibold))
-                        .foregroundColor(selectedStep > 0 ? Color("EmeraldLight") : .secondary.opacity(0.4))
-                    }
-                    .disabled(selectedStep == 0)
-
-                    Spacer()
-
-                    // Step Dots
-                    HStack(spacing: 6) {
-                        ForEach(0..<steps.count, id: \.self) { idx in
-                            Circle()
-                                .fill(idx == selectedStep ? Color("EmeraldLight") : Color.secondary.opacity(0.3))
-                                .frame(width: idx == selectedStep ? 8 : 6, height: idx == selectedStep ? 8 : 6)
-                                .onTapGesture {
-                                    withAnimation(.easeInOut) { selectedStep = idx }
-                                }
-                        }
-                    }
-
-                    Spacer()
-
-                    Button {
-                        if selectedStep < steps.count - 1 {
-                            withAnimation(.easeInOut) { selectedStep += 1 }
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                            Image(systemName: "chevron.right")
-                        }
-                        .font(.footnote.weight(.semibold))
-                        .foregroundColor(selectedStep < steps.count - 1 ? Color("EmeraldLight") : .secondary.opacity(0.4))
-                    }
-                    .disabled(selectedStep == steps.count - 1)
-                }
-                .padding(.top, 4)
             }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(Color("EmeraldLight").opacity(0.2), lineWidth: 1.5)
-                    )
-            )
-        }
-    }
-
-    // MARK: - Checklist Section
-
-    private var checklistSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("QUICK CHECKLIST")
-                .font(.caption.bold())
-                .foregroundColor(.secondary)
-                .padding(.leading, 4)
-
-            VStack(spacing: 10) {
-                ForEach(steps.indices, id: \.self) { index in
-                    let step = steps[index]
-                    Button {
-                        withAnimation {
-                            selectedStep = index
-                        }
-                    } label: {
-                        HStack(alignment: .center, spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(selectedStep == index ? Color("EmeraldLight") : Color("EmeraldLight").opacity(0.12))
-                                    .frame(width: 28, height: 28)
-
-                                Text("\(step.number)")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .foregroundColor(selectedStep == index ? .white : Color("EmeraldLight"))
-                            }
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(step.title)
-                                    .font(.system(size: 14, weight: selectedStep == index ? .bold : .medium))
-                                    .foregroundColor(.primary)
-
-                                Text(step.subtitle)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
-                            }
-
-                            Spacer()
-
-                            if selectedStep == index {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(Color("EmeraldLight"))
-                                    .font(.caption)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    .buttonStyle(.plain)
-
-                    if index < steps.count - 1 {
-                        Divider()
-                    }
-                }
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
-            )
-        }
-    }
-
-    // MARK: - Alternative Methods Section
-
-    private var alternativeMethodsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("POPULAR ALTERNATIVES")
-                .font(.caption.bold())
-                .foregroundColor(.secondary)
-                .padding(.leading, 4)
-
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "hand.tap")
-                        .font(.title3)
-                        .foregroundColor(Color("EmeraldLight"))
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Back Tap (Instant Launch)")
-                            .font(.subheadline.bold())
-                            .foregroundColor(.primary)
-                        Text("Settings → Accessibility → Touch → Back Tap (Double Tap) → Open Tadabbur.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Divider()
-
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "alarm.fill")
-                        .font(.title3)
-                        .foregroundColor(.orange)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Wake Up & Morning Alarm")
-                            .font(.subheadline.bold())
-                            .foregroundColor(.primary)
-                        Text("Set trigger to 'When Alarm is Stopped' to reflect on an Ayah as soon as your morning alarm turns off.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color(uiColor: .secondarySystemGroupedBackground))
-            )
-        }
-    }
-
-    // MARK: - Open Shortcuts & Notification Helper
-
-    private func openShortcutsWithNotificationCheatSheet() {
-        NotificationManager.shared.scheduleCheatSheetNotification()
-
-        if let url = URL(string: "shortcuts://") {
-            UIApplication.shared.open(url) { success in
-                if !success {
-                    if let appStoreUrl = URL(string: "https://apps.apple.com/app/shortcuts/id915249334") {
-                        UIApplication.shared.open(appStoreUrl)
-                    }
-                }
-            }
+            .buttonStyle(.plain)
         }
     }
 }
 
+// Backward-compatible alias
+typealias ShortcutsGuideView = LockScreenWidgetGuideView
+
 #Preview {
-    ShortcutsGuideView()
+    LockScreenWidgetGuideView()
+        .environmentObject(AyahStore())
 }

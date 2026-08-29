@@ -10,7 +10,7 @@ struct ReflectionHomeView: View {
     @EnvironmentObject private var ayahStore: AyahStore
     @EnvironmentObject private var audioPlayer: AudioPlayer
     @Binding var showOverlay: Bool
-    @State private var showShortcutsGuide = false
+    @State private var showWidgetWizard = false
 
     var body: some View {
         ZStack {
@@ -25,15 +25,15 @@ struct ReflectionHomeView: View {
                     AudioButtonView()
                         .padding(.horizontal, 4)
                     openOverlayButton
-                    shortcutsGuideButton
+                    widgetWizardButton
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 50)
             }
         }
-        .sheet(isPresented: $showShortcutsGuide) {
-            ShortcutsGuideView()
+        .sheet(isPresented: $showWidgetWizard) {
+            LockScreenWidgetGuideView()
         }
         .onAppear {
             audioPlayer.load(ayah: ayahStore.currentAyah)
@@ -135,19 +135,19 @@ struct ReflectionHomeView: View {
         .buttonStyle(.plain)
     }
 
-    private var shortcutsGuideButton: some View {
+    private var widgetWizardButton: some View {
         Button {
-            showShortcutsGuide = true
+            showWidgetWizard = true
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "sparkles")
+                Image(systemName: "rectangle.badge.sparkle")
                     .font(.system(size: 13))
-                Text("Auto-Open Setup Guide")
+                Text("Lock Screen Widget Guide")
                     .font(.system(size: 13, weight: .medium))
                 Image(systemName: "chevron.right")
                     .font(.system(size: 10, weight: .semibold))
             }
-            .foregroundColor(.white.opacity(0.7))
+            .foregroundColor(.white.opacity(0.75))
             .padding(.vertical, 8)
             .padding(.horizontal, 14)
             .background(

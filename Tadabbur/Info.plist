@@ -55,17 +55,19 @@
 		<string>Amiri-Bold.ttf</string>
 	</array>
 
-	<!-- URL schemes app can query and open -->
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>shortcuts</string>
-	</array>
-
 	<!-- App Transport Security -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>everyayah.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
 	</dict>
 
 	<!-- Privacy usage descriptions -->

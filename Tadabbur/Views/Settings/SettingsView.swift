@@ -9,7 +9,7 @@ struct SettingsView: View {
     @EnvironmentObject private var ayahStore: AyahStore
 
     @State private var testNotificationSent = false
-    @State private var showShortcutsGuide = false
+    @State private var showWidgetWizard = false
     @State private var alertMessage = ""
     @State private var showAlert = false
 
@@ -291,7 +291,7 @@ struct SettingsView: View {
                                 .background(Capsule().fill(Color("EmeraldLight").opacity(0.15)))
                         }
 
-                        Text("Tadabbur supports the largest possible rectangular Lock Screen widget (2x1 wide slot directly below the clock), plus large Home Screen & iPad widgets.")
+                        Text("Tadabbur features high-contrast, beautiful Lock Screen widgets rotating every 40 minutes, plus iPad & Home Screen widgets.")
                             .font(.caption)
                             .foregroundColor(.secondary)
 
@@ -330,104 +330,34 @@ struct SettingsView: View {
                                 )
                         )
 
-                        // Step-by-step how to add
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("HOW TO ADD TO LOCK SCREEN:")
-                                .font(.caption2.bold())
-                                .foregroundColor(.secondary)
-
-                            HStack(alignment: .top, spacing: 6) {
-                                Text("1.")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Color("EmeraldLight"))
-                                Text("Long press on your **iPhone Lock Screen** and tap **Customize**.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            HStack(alignment: .top, spacing: 6) {
-                                Text("2.")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Color("EmeraldLight"))
-                                Text("Tap the **Lock Screen** preview, then tap the widget area under the clock.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            HStack(alignment: .top, spacing: 6) {
-                                Text("3.")
-                                    .font(.caption.bold())
-                                    .foregroundColor(Color("EmeraldLight"))
-                                Text("Select **Tadabbur** and choose the wide rectangular widget.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 6)
-                } header: {
-                    sectionHeader("Lock Screen Widgets")
-                }
-
-                // MARK: Automations Section
-                Section {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Label("Automations & Habit Interceptor", systemImage: "sparkles")
-                                .font(.headline)
-                                .foregroundColor(Color("EmeraldLight"))
-                            Spacer()
-                        }
-
-                        Text("Automatically bring up Tadabbur before opening daily apps (e.g. Safari, Social Media) or on a schedule using Apple Shortcuts.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        // Open Shortcuts App Button
+                        // Interactive Wizard Launch Button
                         Button {
-                            openShortcutsApp()
+                            showWidgetWizard = true
                         } label: {
-                            HStack {
-                                Image(systemName: "arrow.up.forward.app.fill")
-                                    .font(.subheadline)
-                                Text("Open Shortcuts App")
+                            HStack(spacing: 8) {
+                                Image(systemName: "wand.and.stars")
+                                    .font(.subheadline.weight(.semibold))
+                                Text("Open Step-by-Step Widget Wizard")
                                     .font(.subheadline.weight(.semibold))
                                 Spacer()
                                 Image(systemName: "chevron.right")
                                     .font(.caption2)
-                                    .foregroundColor(.white.opacity(0.7))
                             }
                             .foregroundColor(.white)
                             .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                                     .fill(Color("EmeraldLight"))
                             )
                         }
                         .buttonStyle(.plain)
-
-                        // View Full Guide Button
-                        Button {
-                            showShortcutsGuide = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "list.bullet.rectangle.portrait.fill")
-                                    .foregroundColor(Color("EmeraldLight"))
-                                Text("View Visual Step-by-Step Guide")
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.top, 4)
-                        }
                     }
                     .padding(.vertical, 6)
                 } header: {
-                    sectionHeader("Shortcuts Automations")
+                    sectionHeader("Lock Screen Widgets")
                 } footer: {
-                    Text("Takes less than 1 minute to set up in the Shortcuts app.")
+                    Text("Tap the button above for an interactive visual guide on adding the widget to your Lock Screen.")
                         .font(.caption)
                 }
 
@@ -452,8 +382,8 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showShortcutsGuide) {
-                ShortcutsGuideView()
+            .sheet(isPresented: $showWidgetWizard) {
+                LockScreenWidgetGuideView()
             }
             .alert("Notification Permission", isPresented: $showAlert) {
                 Button("Open Settings") {
@@ -474,18 +404,6 @@ struct SettingsView: View {
             .fontWeight(.semibold)
             .foregroundColor(.primary)
             .textCase(nil)
-    }
-
-    private func openShortcutsApp() {
-        if let url = URL(string: "shortcuts://") {
-            UIApplication.shared.open(url) { success in
-                if !success {
-                    if let appStoreUrl = URL(string: "https://apps.apple.com/app/shortcuts/id915249334") {
-                        UIApplication.shared.open(appStoreUrl)
-                    }
-                }
-            }
-        }
     }
 
     private func handleNotificationToggle(enabled: Bool) {

@@ -11,9 +11,10 @@ A mindful iOS app designed to display inspiring Quranic verses (تدبر) throug
 - **✨ Frosted Glassmorphism Audio Player**: Live sound equalizer wave animations, hairline progress bar, elapsed timer, and tactile haptic feedback.
 - **📱 Lock Screen & StandBy Widgets**:
   - `accessoryRectangular` lock screen widget for at-a-glance reflection.
-  - `systemLarge` home screen & iPad widget.
-- **⏰ Smart Rotation & Background Refresh**: Background app refresh task and repeating notifications to keep verses fresh every 30 minutes.
-- **⚡ Shortcuts Automation Integration**: Step-by-step in-app guide and cheat-sheet for automatic reflection upon unlocking the device.
+  - `systemLarge` home screen & iPad widget with futuristic mountain aurora aesthetics.
+  - **40-Minute Auto-Rotation** to keep verses fresh all day.
+- **🧙 Interactive Widget Setup Wizard**: Step-by-step visual in-app guide to easily place and customize the widget on your iPhone Lock Screen.
+- **🔔 Configurable Daily Notifications**: 1 to 5 daily reminders, evenly spaced or custom times.
 
 ---
 

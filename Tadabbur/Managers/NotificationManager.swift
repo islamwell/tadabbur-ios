@@ -197,24 +197,6 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    /// Sends a quick helper cheat sheet notification when switching to Apple Shortcuts.
-    func scheduleCheatSheetNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "💡 Tadabbur Shortcuts Cheat Sheet"
-        content.body = "1. Automation tab → 2. When unlocked → 3. Run Immediately → 4. Open App: Tadabbur"
-        content.sound = .default
-        if #available(iOS 15.0, *) {
-            content.interruptionLevel = .timeSensitive
-        }
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(
-            identifier: "com.tadabbur.cheatSheet.\(UUID().uuidString)",
-            content: content,
-            trigger: trigger
-        )
-        center.add(request)
-    }
 
     // MARK: - Convenience
 
