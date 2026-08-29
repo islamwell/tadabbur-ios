@@ -8,7 +8,7 @@ import BackgroundTasks
 enum BackgroundRefreshHandler {
 
     static let taskIdentifier = "com.tadabbur.refresh"
-    private static let refreshInterval: TimeInterval = 30 * 60 // 30 minutes
+    private static let refreshInterval: TimeInterval = 40 * 60 // 40 minutes
 
     // MARK: Registration
 
@@ -25,7 +25,7 @@ enum BackgroundRefreshHandler {
 
     // MARK: Scheduling
 
-    /// Schedules the next background refresh ~30 minutes from now.
+    /// Schedules the next background refresh ~40 minutes from now.
     static func scheduleNextRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: taskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: refreshInterval)
@@ -40,6 +40,11 @@ enum BackgroundRefreshHandler {
     // MARK: Task Handling
 
     private static func handle(task: BGAppRefreshTask) {
+        // Register expiration handler immediately in case system cancels early
+        task.expirationHandler = {
+            task.setTaskCompleted(success: false)
+        }
+
         // Schedule the next refresh immediately so the chain continues
         scheduleNextRefresh()
 
@@ -47,17 +52,11 @@ enum BackgroundRefreshHandler {
         let store = AyahStore()
         store.checkAndRotateIfOverdue()
 
-        // Update the notification content for the rotated ayah
+        // Update notification content
         NotificationManager.shared.updateSchedule(
-            enabled: UserDefaults.standard.bool(forKey: "notificationEnabled"),
-            ayah: store.currentAyah
+            enabled: UserDefaults.standard.bool(forKey: "notificationEnabled")
         )
 
         task.setTaskCompleted(success: true)
-
-        // Cancel handler: clean up if the system kills us mid-task
-        task.expirationHandler = {
-            task.setTaskCompleted(success: false)
-        }
     }
 }

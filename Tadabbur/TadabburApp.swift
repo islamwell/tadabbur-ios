@@ -24,8 +24,8 @@ struct TadabburApp: App {
                     // Request notification permission on first launch
                     NotificationManager.shared.requestAuthorization { granted in
                         if granted && settingsStore.notificationEnabled {
-                            NotificationManager.shared.scheduleRepeatingNotification(
-                                for: ayahStore.currentAyah
+                            NotificationManager.shared.scheduleDailyNotifications(
+                                from: settingsStore
                             )
                         }
                     }

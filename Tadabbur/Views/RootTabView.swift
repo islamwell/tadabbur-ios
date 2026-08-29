@@ -60,10 +60,10 @@ struct RootTabView: View {
         // Load audio for the (possibly new) current ayah
         audioPlayer.load(ayah: ayahStore.currentAyah)
 
-        // Update notification with current ayah content
+        // Update notification with current settings
         NotificationManager.shared.updateSchedule(
             enabled: settingsStore.notificationEnabled,
-            ayah: ayahStore.currentAyah
+            settingsStore: settingsStore
         )
 
         // Show overlay if the setting is on

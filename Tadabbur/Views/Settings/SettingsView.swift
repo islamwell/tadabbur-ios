@@ -84,9 +84,9 @@ struct SettingsView: View {
                 Section {
                     Toggle(isOn: $settingsStore.notificationEnabled) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Ayah Reminders")
+                            Text("Daily Ayah Reminders")
                                 .font(.body)
-                            Text("Lock screen notification every 30 minutes")
+                            Text("Receive curated Quranic verses on your Lock Screen")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -96,37 +96,182 @@ struct SettingsView: View {
                         handleNotificationToggle(enabled: enabled)
                     }
 
-                    // Test Notification Button
-                    Button {
-                        sendTestNotification()
-                    } label: {
-                        HStack {
-                            Image(systemName: "bell.badge.fill")
-                                .foregroundColor(Color("EmeraldLight"))
-                            Text(testNotificationSent ? "Notification Scheduled in 3s! (Lock Screen Now)" : "Send Test Lock Screen Notification (3s)")
-                                .foregroundColor(.primary)
-                            Spacer()
-                        }
-                    }
+                    if settingsStore.notificationEnabled {
+                        // Frequency (1 to 5 times per day)
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Daily Frequency")
+                                    .font(.body)
+                                Spacer()
+                                Text("\(settingsStore.dailyNotificationCount)× per day")
+                                    .font(.subheadline.bold())
+                                    .foregroundColor(Color("EmeraldLight"))
+                            }
 
-                    // Deep link to system notification settings
-                    Button {
-                        openNotificationSettings()
-                    } label: {
-                        HStack {
-                            Text("Notification Settings")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
+                            Picker("Frequency", selection: $settingsStore.dailyNotificationCount) {
+                                Text("1×").tag(1)
+                                Text("2×").tag(2)
+                                Text("3×").tag(3)
+                                Text("4×").tag(4)
+                                Text("5×").tag(5)
+                            }
+                            .pickerStyle(.segmented)
+                            .onChange(of: settingsStore.dailyNotificationCount) { _ in
+                                rescheduleDailyNotifications()
+                            }
+                        }
+                        .padding(.vertical, 4)
+
+                        // Schedule Mode (Evenly Spaced vs Custom Specific Times)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Schedule Mode")
+                                .font(.caption.bold())
                                 .foregroundColor(.secondary)
+
+                            Picker("Schedule Mode", selection: $settingsStore.notificationScheduleMode) {
+                                ForEach(NotificationScheduleMode.allCases) { mode in
+                                    Text(mode.rawValue).tag(mode)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .onChange(of: settingsStore.notificationScheduleMode) { _ in
+                                rescheduleDailyNotifications()
+                            }
+                        }
+                        .padding(.vertical, 4)
+
+                        // Mode A: Evenly Spaced Options
+                        if settingsStore.notificationScheduleMode == .evenlySpaced {
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack {
+                                    Text("Active Hours Range")
+                                        .font(.subheadline)
+                                    Spacer()
+                                    Text("\(formatHour(settingsStore.dayStartHour)) – \(formatHour(settingsStore.dayEndHour))")
+                                        .font(.subheadline.monospacedDigit())
+                                        .foregroundColor(.secondary)
+                                }
+
+                                HStack(spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Starts: \(formatHour(settingsStore.dayStartHour))")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                        Stepper("", value: $settingsStore.dayStartHour, in: 4...12)
+                                            .labelsHidden()
+                                    }
+
+                                    Spacer()
+
+                                    VStack(alignment: .trailing, spacing: 4) {
+                                        Text("Ends: \(formatHour(settingsStore.dayEndHour))")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                        Stepper("", value: $settingsStore.dayEndHour, in: 18...23)
+                                            .labelsHidden()
+                                    }
+                                }
+                                .onChange(of: settingsStore.dayStartHour) { _ in rescheduleDailyNotifications() }
+                                .onChange(of: settingsStore.dayEndHour) { _ in rescheduleDailyNotifications() }
+
+                                // Computed Times Preview Pills
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("SCHEDULED REMINDER TIMES:")
+                                        .font(.caption2.bold())
+                                        .foregroundColor(.secondary)
+
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 8) {
+                                            ForEach(Array(settingsStore.targetNotificationTimes().enumerated()), id: \.offset) { idx, time in
+                                                HStack(spacing: 4) {
+                                                    Image(systemName: "clock.fill")
+                                                        .font(.system(size: 9))
+                                                    Text(formatTimeHourMin(time.hour, time.minute))
+                                                        .font(.caption.bold())
+                                                }
+                                                .foregroundColor(Color("EmeraldLight"))
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .background(
+                                                    Capsule()
+                                                        .fill(Color("EmeraldLight").opacity(0.12))
+                                                        .overlay(Capsule().stroke(Color("EmeraldLight").opacity(0.25), lineWidth: 1))
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(.top, 4)
+                            }
+                            .padding(.vertical, 4)
+                        }
+
+                        // Mode B: Custom Times DatePickers
+                        if settingsStore.notificationScheduleMode == .customTimes {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("SPECIFY EXACT REMINDER TIMES:")
+                                    .font(.caption2.bold())
+                                    .foregroundColor(.secondary)
+
+                                ForEach(0..<settingsStore.dailyNotificationCount, id: \.self) { idx in
+                                    HStack {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "\(idx + 1).circle.fill")
+                                                .foregroundColor(Color("EmeraldLight"))
+                                            Text("Reminder \(idx + 1)")
+                                                .font(.subheadline)
+                                        }
+
+                                        Spacer()
+
+                                        DatePicker(
+                                            "",
+                                            selection: customTimeBinding(for: idx),
+                                            displayedComponents: .hourAndMinute
+                                        )
+                                        .labelsHidden()
+                                        .onChange(of: settingsStore.customNotificationTimes) { _ in
+                                            rescheduleDailyNotifications()
+                                        }
+                                    }
+                                    .padding(.vertical, 2)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+
+                        // Test Notification Button
+                        Button {
+                            sendTestNotification()
+                        } label: {
+                            HStack {
+                                Image(systemName: "bell.badge.fill")
+                                    .foregroundColor(Color("EmeraldLight"))
+                                Text(testNotificationSent ? "Scheduled in 3s! (Lock Screen Now)" : "Send Test Lock Screen Notification (3s)")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                        }
+
+                        // Deep link to system notification settings
+                        Button {
+                            openNotificationSettings()
+                        } label: {
+                            HStack {
+                                Text("Open iOS Notification Settings")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
 
                 } header: {
                     sectionHeader("Notifications")
                 } footer: {
-                    Text("Tap 'Send Test Lock Screen Notification' then press Cmd+L (Lock Screen) in the simulator to see the lock screen reminder.")
+                    Text("Configure 1 to 5 daily notifications with rotating verses. Lock your device after tapping 'Send Test Notification' to see the Lock Screen banner.")
                         .font(.caption)
                 }
 
@@ -347,9 +492,7 @@ struct SettingsView: View {
         if enabled {
             NotificationManager.shared.requestAuthorization { granted in
                 if granted {
-                    NotificationManager.shared.scheduleRepeatingNotification(
-                        for: ayahStore.currentAyah
-                    )
+                    NotificationManager.shared.scheduleDailyNotifications(from: settingsStore)
                 } else {
                     // Permission denied — revert toggle and notify user
                     settingsStore.notificationEnabled = false
@@ -360,6 +503,44 @@ struct SettingsView: View {
         } else {
             NotificationManager.shared.cancelAll()
         }
+    }
+
+    private func rescheduleDailyNotifications() {
+        guard settingsStore.notificationEnabled else { return }
+        NotificationManager.shared.scheduleDailyNotifications(from: settingsStore)
+    }
+
+    private func customTimeBinding(for index: Int) -> Binding<Date> {
+        Binding(
+            get: {
+                if index < settingsStore.customNotificationTimes.count {
+                    return settingsStore.customNotificationTimes[index]
+                }
+                return Date()
+            },
+            set: { newDate in
+                var times = settingsStore.customNotificationTimes
+                while times.count <= index {
+                    times.append(Date())
+                }
+                times[index] = newDate
+                settingsStore.customNotificationTimes = times
+            }
+        )
+    }
+
+    private func formatHour(_ hour: Int) -> String {
+        let h = hour % 24
+        let ampm = h >= 12 ? "PM" : "AM"
+        let displayH = h % 12 == 0 ? 12 : h % 12
+        return "\(displayH):00 \(ampm)"
+    }
+
+    private func formatTimeHourMin(_ hour: Int, _ min: Int) -> String {
+        let h = hour % 24
+        let ampm = h >= 12 ? "PM" : "AM"
+        let displayH = h % 12 == 0 ? 12 : h % 12
+        return String(format: "%d:%02d %@", displayH, min, ampm)
     }
 
     private func openNotificationSettings() {
@@ -382,9 +563,8 @@ struct SettingsView: View {
     }
 
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "\(version) (\(build))"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.3"
+        return "v\(version) (updated 2026-08-29 07:15)"
     }
 }
 

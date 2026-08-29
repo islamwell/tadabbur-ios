@@ -8,7 +8,7 @@ struct AyahTimelineEntry: TimelineEntry {
     let ayah: Ayah
 }
 
-// MARK: - Timeline Provider
+// MARK: - Timeline Provider (40-Minute Rotation)
 
 struct AyahTimelineProvider: TimelineProvider {
     typealias Entry = AyahTimelineEntry
@@ -27,15 +27,15 @@ struct AyahTimelineProvider: TimelineProvider {
         let currentDate = Date()
         let catalog = Ayah.catalog
 
-        // Create timeline entries rotating verses every 30 minutes
-        for hourOffset in 0..<12 {
-            guard let entryDate = Calendar.current.date(byAdding: .minute, value: hourOffset * 30, to: currentDate) else { continue }
-            let ayahIndex = (hourOffset) % catalog.count
+        // Rotate verses every 40 minutes across a 24-hour timeline window (36 slots)
+        for slot in 0..<36 {
+            guard let entryDate = Calendar.current.date(byAdding: .minute, value: slot * 40, to: currentDate) else { continue }
+            let ayahIndex = slot % catalog.count
             let entry = AyahTimelineEntry(date: entryDate, ayah: catalog[ayahIndex])
             entries.append(entry)
         }
 
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 6, to: currentDate) ?? currentDate.addingTimeInterval(3600 * 6)
+        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 8, to: currentDate) ?? currentDate.addingTimeInterval(3600 * 8)
         let timeline = Timeline(entries: entries, policy: .after(nextUpdate))
         completion(timeline)
     }
@@ -62,11 +62,11 @@ struct TadabburWidgetEntryView: View {
                 .widgetURL(URL(string: "tadabbur://reflect"))
 
         case .systemMedium:
-            SystemMediumView(ayah: entry.ayah)
+            FuturisticMountainMediumView(ayah: entry.ayah)
                 .widgetURL(URL(string: "tadabbur://reflect"))
 
         case .systemLarge:
-            SystemLargeView(ayah: entry.ayah)
+            FuturisticMountainLargeView(ayah: entry.ayah)
                 .widgetURL(URL(string: "tadabbur://reflect"))
 
         default:
@@ -83,33 +83,32 @@ struct AccessoryRectangularView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            // Header Row: Reference & Icon
+            // Header Row: Reference & Futuristic Sparkle
             HStack(spacing: 4) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
                 Text(ayah.reference)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                 Spacer()
                 Text(ayah.surahNameArabic)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 10, weight: .semibold))
                     .environment(\.layoutDirection, .rightToLeft)
             }
-            .foregroundColor(.primary)
 
-            // Arabic text (Primary focus)
+            // Arabic text (High contrast bold Uthmani)
             Text(ayah.arabicText)
                 .font(.system(size: 13, weight: .bold, design: .serif))
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.75)
                 .environment(\.layoutDirection, .rightToLeft)
                 .frame(maxWidth: .infinity, alignment: .trailing)
 
             // English translation excerpt
             Text(ayah.translation)
-                .font(.system(size: 10.5, weight: .regular))
+                .font(.system(size: 10, weight: .medium))
                 .lineLimit(2)
-                .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+                .opacity(0.85)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -123,7 +122,7 @@ struct AccessoryInlineView: View {
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: "sparkle")
-            Text("\(ayah.surahName) \(ayah.ayahNumber) · \(ayah.translation)")
+            Text("✨ \(ayah.surahName) \(ayah.ayahNumber) · \(ayah.translation)")
         }
     }
 }
@@ -138,9 +137,9 @@ struct AccessoryCircularView: View {
             AccessoryWidgetBackground()
             VStack(spacing: 1) {
                 Image(systemName: "moon.stars.fill")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                 Text("تدبر")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: 8.5, weight: .bold))
                 Text("\(ayah.ayahNumber)")
                     .font(.system(size: 8, weight: .semibold, design: .rounded))
             }
@@ -148,136 +147,303 @@ struct AccessoryCircularView: View {
     }
 }
 
-// MARK: - 4. Largest iPad Lock Screen & Home Screen Widget (systemLarge)
+// MARK: - 4. Mountain Silhouette & Aurora Futuristic Landscape Background
 
-struct SystemLargeView: View {
-    let ayah: Ayah
-
+struct MountainAuroraBackground: View {
     var body: some View {
         ZStack {
-            // Background Gradient
+            // Deep obsidian / cyber-emerald sky gradient
             LinearGradient(
-                colors: [Color(red: 0.04, green: 0.22, blue: 0.16), Color(red: 0.05, green: 0.10, blue: 0.18)],
+                colors: [
+                    Color(red: 0.02, green: 0.06, blue: 0.10), // Obsidian Navy
+                    Color(red: 0.03, green: 0.15, blue: 0.12), // Deep Pine
+                    Color(red: 0.01, green: 0.05, blue: 0.08)  // Midnight Base
+                ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
-            VStack(spacing: 16) {
-                // Top Header Badge
+            // Luminous Aurora Borealis Wave (Top-Right Glow)
+            RadialGradient(
+                colors: [
+                    Color(red: 0.18, green: 0.85, blue: 0.58).opacity(0.35),
+                    Color(red: 0.10, green: 0.60, blue: 0.80).opacity(0.15),
+                    .clear
+                ],
+                center: .topTrailing,
+                startRadius: 10,
+                endRadius: 280
+            )
+
+            // Starry Constellation Dots
+            GeometryReader { geo in
+                let w = geo.size.width
+                let h = geo.size.height
+
+                Circle().fill(Color.white.opacity(0.7)).frame(width: 2, height: 2).position(x: w * 0.15, y: h * 0.12)
+                Circle().fill(Color.white.opacity(0.4)).frame(width: 1.5, height: 1.5).position(x: w * 0.35, y: h * 0.08)
+                Circle().fill(Color.white.opacity(0.8)).frame(width: 2.5, height: 2.5).position(x: w * 0.72, y: h * 0.18)
+                Circle().fill(Color.white.opacity(0.5)).frame(width: 1.5, height: 1.5).position(x: w * 0.88, y: h * 0.10)
+                Circle().fill(Color.white.opacity(0.6)).frame(width: 2, height: 2).position(x: w * 0.50, y: h * 0.22)
+            }
+
+            // Mountain Layer 1 (Back Distant Ridge)
+            MountainRidgeShape(peaks: [0.35, 0.18, 0.40, 0.25, 0.45, 0.20, 0.38])
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.06, green: 0.24, blue: 0.20).opacity(0.5),
+                            Color(red: 0.02, green: 0.10, blue: 0.12).opacity(0.8)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            // Mountain Layer 2 (Foreground Sharp Ridge with Neon Crest)
+            MountainRidgeShape(peaks: [0.55, 0.38, 0.60, 0.42, 0.65, 0.48, 0.58])
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.02, green: 0.09, blue: 0.10),
+                            Color(red: 0.01, green: 0.04, blue: 0.06)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay(
+                    MountainRidgeLine(peaks: [0.55, 0.38, 0.60, 0.42, 0.65, 0.48, 0.58])
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.31, green: 0.90, blue: 0.60).opacity(0.5),
+                                    Color(red: 0.10, green: 0.60, blue: 0.80).opacity(0.3),
+                                    .clear
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        }
+    }
+}
+
+// Custom Mountain Polygon Shape
+struct MountainRidgeShape: Shape {
+    let peaks: [CGFloat]
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let step = rect.width / CGFloat(peaks.count - 1)
+        path.move(to: CGPoint(x: 0, y: rect.height))
+        path.addLine(to: CGPoint(x: 0, y: rect.height * (1.0 - peaks[0])))
+
+        for i in 1..<peaks.count {
+            let x = CGFloat(i) * step
+            let y = rect.height * (1.0 - peaks[i])
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct MountainRidgeLine: Shape {
+    let peaks: [CGFloat]
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let step = rect.width / CGFloat(peaks.count - 1)
+        path.move(to: CGPoint(x: 0, y: rect.height * (1.0 - peaks[0])))
+
+        for i in 1..<peaks.count {
+            let x = CGFloat(i) * step
+            let y = rect.height * (1.0 - peaks[i])
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+        return path
+    }
+}
+
+// MARK: - 5. Largest Futuristic Mountain Widget (systemLarge)
+
+struct FuturisticMountainLargeView: View {
+    let ayah: Ayah
+
+    var body: some View {
+        ZStack {
+            // Mountain Landscape & Aurora
+            MountainAuroraBackground()
+
+            // High-Contrast Content Container
+            VStack(spacing: 14) {
+                // Top Futuristic Header
                 HStack {
                     HStack(spacing: 6) {
                         Image(systemName: "moon.stars.fill")
-                            .foregroundColor(Color(red: 0.31, green: 0.78, blue: 0.47))
-                            .font(.subheadline)
+                            .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
+                            .font(.system(size: 13, weight: .bold))
                         Text("TADABBUR")
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
-                            .tracking(1.5)
-                            .foregroundColor(Color(red: 0.31, green: 0.78, blue: 0.47))
+                            .font(.system(size: 11, weight: .heavy, design: .rounded))
+                            .tracking(2)
+                            .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(
                         Capsule()
-                            .fill(Color(red: 0.31, green: 0.78, blue: 0.47).opacity(0.18))
+                            .fill(Color(red: 0.35, green: 0.95, blue: 0.65).opacity(0.16))
+                            .overlay(
+                                Capsule().stroke(Color(red: 0.35, green: 0.95, blue: 0.65).opacity(0.35), lineWidth: 1)
+                            )
                     )
 
                     Spacer()
 
+                    // Reference Badge
                     Text(ayah.reference)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white.opacity(0.12))
+                        )
                 }
 
                 Spacer(minLength: 0)
 
-                // Arabic Verse
+                // Arabic Verse (Crystal-Clear High Contrast Calligraphy)
                 Text(ayah.arabicText)
-                    .font(.system(size: 22, weight: .semibold, design: .serif))
+                    .font(.system(size: 22, weight: .bold, design: .serif))
                     .multilineTextAlignment(.center)
-                    .lineSpacing(8)
+                    .lineSpacing(9)
                     .foregroundColor(.white)
+                    .shadow(color: Color.black.opacity(0.8), radius: 6, x: 0, y: 3)
                     .environment(\.layoutDirection, .rightToLeft)
-                    .padding(.horizontal, 8)
+                    .padding(.horizontal, 6)
 
-                // Ornamental Divider
+                // Futuristic Neo-Emerald Divider
                 HStack(spacing: 8) {
                     Rectangle()
-                        .fill(Color.white.opacity(0.2))
+                        .fill(
+                            LinearGradient(
+                                colors: [.clear, Color(red: 0.35, green: 0.95, blue: 0.65).opacity(0.7)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .frame(height: 1)
+
                     Image(systemName: "sparkle")
-                        .font(.caption2)
-                        .foregroundColor(Color(red: 0.31, green: 0.78, blue: 0.47))
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
+
                     Rectangle()
-                        .fill(Color.white.opacity(0.2))
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(red: 0.35, green: 0.95, blue: 0.65).opacity(0.7), .clear],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .frame(height: 1)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 28)
 
-                // English Translation
+                // English Translation (Crisp High-Contrast Typography)
                 Text(ayah.translation)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.white.opacity(0.92))
                     .lineSpacing(4)
-                    .padding(.horizontal, 8)
+                    .shadow(color: Color.black.opacity(0.8), radius: 4, x: 0, y: 2)
+                    .padding(.horizontal, 6)
 
                 Spacer(minLength: 0)
 
-                // Bottom Callout
+                // Bottom Callout Card
                 HStack {
-                    Image(systemName: "play.circle.fill")
-                        .foregroundColor(Color(red: 0.31, green: 0.78, blue: 0.47))
-                    Text("Tap to reflect & listen")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                    HStack(spacing: 6) {
+                        Image(systemName: "play.circle.fill")
+                            .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
+                            .font(.system(size: 14))
+                        Text("Sheikh Nasser Al-Qatami")
+                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white.opacity(0.85))
+                    }
+
                     Spacer()
+
                     Text(ayah.arabicReference)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
                         .environment(\.layoutDirection, .rightToLeft)
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.black.opacity(0.35))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        )
+                )
             }
-            .padding(18)
+            .padding(16)
         }
     }
 }
 
-// MARK: - 5. System Medium Widget (systemMedium)
+// MARK: - 6. Futuristic Mountain Medium Widget (systemMedium)
 
-struct SystemMediumView: View {
+struct FuturisticMountainMediumView: View {
     let ayah: Ayah
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color(red: 0.04, green: 0.22, blue: 0.16), Color(red: 0.05, green: 0.10, blue: 0.18)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            MountainAuroraBackground()
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
+                // Top row
                 HStack {
-                    Text(ayah.reference)
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0.31, green: 0.78, blue: 0.47))
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
+                        Text(ayah.reference)
+                            .font(.system(size: 11.5, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0.35, green: 0.95, blue: 0.65))
+                    }
                     Spacer()
                     Text(ayah.surahNameArabic)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.white)
                         .environment(\.layoutDirection, .rightToLeft)
                 }
 
+                // Arabic Verse
                 Text(ayah.arabicText)
                     .font(.system(size: 15, weight: .bold, design: .serif))
                     .lineLimit(2)
                     .foregroundColor(.white)
+                    .shadow(color: Color.black.opacity(0.8), radius: 4, x: 0, y: 2)
                     .environment(\.layoutDirection, .rightToLeft)
                     .frame(maxWidth: .infinity, alignment: .trailing)
 
+                // Translation
                 Text(ayah.translation)
-                    .font(.system(size: 11.5, weight: .regular))
+                    .font(.system(size: 11, weight: .medium))
                     .lineLimit(2)
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundColor(.white.opacity(0.9))
+                    .shadow(color: Color.black.opacity(0.8), radius: 3, x: 0, y: 1)
             }
             .padding(14)
         }
@@ -302,7 +468,7 @@ struct TadabburLockScreenWidget: Widget {
             }
         }
         .configurationDisplayName("Tadabbur Daily Ayah")
-        .description("Display Quranic verses on your Lock Screen and Home Screen for instant reflection.")
+        .description("Display inspiring Quranic verses on your Lock Screen and Home Screen, rotating every 40 minutes.")
         .supportedFamilies([
             .accessoryRectangular,  // Largest iPhone Lock Screen size
             .accessoryInline,       // Above clock on Lock Screen

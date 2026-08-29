@@ -49,11 +49,11 @@ final class AyahStore: ObservableObject {
         currentAyah = Ayah.catalog[nextIndex]
     }
 
-    /// Rotates only if ≥30 minutes have elapsed since the last rotation.
+    /// Rotates only if ≥40 minutes have elapsed since the last rotation.
     /// Called every time the app enters the foreground.
     func checkAndRotateIfOverdue() {
         let elapsed = Date().timeIntervalSince(lastRotationDate)
-        if elapsed >= 30 * 60 {
+        if elapsed >= 40 * 60 {
             rotate()
         }
     }

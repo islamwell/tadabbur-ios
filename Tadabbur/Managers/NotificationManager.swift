@@ -67,40 +67,70 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     // MARK: - Scheduling
 
-    /// Schedules (or reschedules) the repeating ayah reminder notification.
-    /// - Parameters:
-    ///   - ayah: The ayah whose content will appear in the notification.
-    func scheduleRepeatingNotification(for ayah: Ayah) {
-        center.removePendingNotificationRequests(withIdentifiers: [notificationID])
+    /// Schedules daily recurring notifications (1 to 5 per day) based on user configuration in SettingsStore.
+    /// Each daily time slot receives a distinct rotating Ayah from the catalog.
+    func scheduleDailyNotifications(from settingsStore: SettingsStore) {
+        // First cancel all previous reminders
+        cancelAll()
 
-        let content = UNMutableNotificationContent()
-        content.title = ayah.reference
-        content.body = ayah.translation
-        content.sound = .default
-        if #available(iOS 15.0, *) {
-            content.interruptionLevel = .timeSensitive
-        }
-        content.userInfo = ["arabicText": ayah.arabicText, "ayahID": ayah.id]
+        guard settingsStore.notificationEnabled else { return }
 
-        // Repeat every 30 minutes
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 30 * 60, repeats: true)
+        let targetTimes = settingsStore.targetNotificationTimes()
+        let catalog = Ayah.catalog
+        guard !catalog.isEmpty, !targetTimes.isEmpty else { return }
 
-        let request = UNNotificationRequest(
-            identifier: notificationID,
-            content: content,
-            trigger: trigger
-        )
+        let currentBaseIndex = UserDefaults.standard.integer(forKey: "ayahIndex")
 
-        center.add(request) { error in
-            if let error = error {
-                print("[NotificationManager] Failed to schedule repeating notification: \(error.localizedDescription)")
+        for (index, time) in targetTimes.enumerated() {
+            let slotAyahIndex = (currentBaseIndex + index) % catalog.count
+            let slotAyah = catalog[slotAyahIndex]
+
+            let content = UNMutableNotificationContent()
+            content.title = "تدبر · \(slotAyah.reference)"
+            content.body = "\(slotAyah.arabicText)\n\n\(slotAyah.translation)"
+            content.sound = .default
+            if #available(iOS 15.0, *) {
+                content.interruptionLevel = .timeSensitive
+            }
+            content.userInfo = [
+                "arabicText": slotAyah.arabicText,
+                "ayahID": slotAyah.id,
+                "slotIndex": index
+            ]
+
+            var dateComponents = DateComponents()
+            dateComponents.hour = time.hour
+            dateComponents.minute = time.minute
+
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(
+                identifier: "\(notificationID).slot.\(index)",
+                content: content,
+                trigger: trigger
+            )
+
+            center.add(request) { error in
+                if let error = error {
+                    print("[NotificationManager] Failed to schedule slot \(index) at \(time.hour):\(time.minute): \(error.localizedDescription)")
+                }
             }
         }
     }
 
+    /// Backwards compatible method for single ayah scheduling.
+    func scheduleRepeatingNotification(for ayah: Ayah) {
+        let store = SettingsStore()
+        scheduleDailyNotifications(from: store)
+    }
+
     /// Cancels all pending Tadabbur notifications.
     func cancelAll() {
-        center.removePendingNotificationRequests(withIdentifiers: [notificationID])
+        center.getPendingNotificationRequests { [weak self] requests in
+            let tadabburIDs = requests
+                .map { $0.identifier }
+                .filter { $0.starts(with: self?.notificationID ?? "com.tadabbur") }
+            self?.center.removePendingNotificationRequests(withIdentifiers: tadabburIDs)
+        }
     }
 
     /// Schedules a test notification in a few seconds so the user can test lock screen display.
@@ -189,15 +219,20 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // MARK: - Convenience
 
     /// Schedules if enabled; cancels if disabled.
-    func updateSchedule(enabled: Bool, ayah: Ayah) {
+    func updateSchedule(enabled: Bool, settingsStore: SettingsStore? = nil) {
         if enabled {
             checkAuthorizationStatus { [weak self] status in
                 if status == .authorized {
-                    self?.scheduleRepeatingNotification(for: ayah)
+                    let store = settingsStore ?? SettingsStore()
+                    self?.scheduleDailyNotifications(from: store)
                 }
             }
         } else {
             cancelAll()
         }
+    }
+
+    func updateSchedule(enabled: Bool, ayah: Ayah) {
+        updateSchedule(enabled: enabled, settingsStore: nil)
     }
 }
